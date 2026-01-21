@@ -14,8 +14,9 @@ export const LiveDarshanLocators = {
   create_popup_title:
     "Create New Live Darshan",
   update_popup_title:'Update Live Darshan',
+  delete_popup_title:'Delete Confirmation',
   quick_schedule_input:
-    "xpath=/html/body/div[17]/div/div/div/div[2]/section/div[2]/form/div[1]/div[2]/input",
+    "xpath=/html/body/div[17]/div/div/div/div[2]/section/div/div[2]/form/div[1]/div[1]/div[2]/input",
   date_input: "[name='date']",
   start_time_input: "[name='startTime']", 
   timezone_input:
@@ -24,19 +25,19 @@ export const LiveDarshanLocators = {
    "[name='meetingURL']",
   auto_zoom_checkbox:
     "input[type='checkbox']",
-  cancel_btn:
-    "xpath=/html[1]/body[1]/div[17]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/button[1]/*[name()='svg'][1]",
+  cancel_btnX:
+    "//button[@aria-label='Close modal']//*[name()='svg']",
   create_btn: "xpath=/html[1]/body[1]/div[17]/div[1]/div[1]/div[1]/div[2]/section[1]/div[2]/form[1]/div[6]/button[1]",
   update_btn : "xpath=/html[1]/body[1]/div[18]/div[1]/div[1]/div[1]/div[2]/section[1]/div[2]/form[1]/div[4]",
-  meeting_url_error:
+  meeting_url_Required_error:
     "xpath=/html/body/div[17]/div/div/div/div[2]/section/div[2]/form/div[4]/div[2]",
-  date_error:
+  date__Required_error:
     "xpath=/html/body/div[17]/div/div/div/div[2]/section/div[2]/form/div[2]/div[1]/div/div[2]",
-  start_time_error:
+  start_time__Required_error:
     "xpath=/html/body/div[17]/div/div/div/div[2]/section/div[2]/form/div[2]/div[2]/div/div[2]",
   update_meeting_url_error:
     "xpath=/html/body/div[18]/div/div/div/div[2]/section/div[2]/form/div[3]/div[2]",
   update_start_time_error:
     "xpath=/html/body/div[18]/div/div/div/div[2]/section/div[2]/form/div[1]/div[2]/div/div[2]",
-  create_edit_success_msg: ".mantine-Notification-body",
+  create_edit_delete_success_msg: ".mantine-Notification-body",
 };

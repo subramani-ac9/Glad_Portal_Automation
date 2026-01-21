@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { LiveDarshanLocators } from "../locators/LiveDarshanLocators";
-import { toInputDateFormat } from "../utils/dateUtils";
+import { findRowAndAction, toInputDateFormat } from "../utils/dateUtils";
 
 export class LiveDarshanPage {
   constructor(page) {
@@ -25,9 +25,9 @@ export class LiveDarshanPage {
     this.updatePopupTitle = page
       .getByText(LiveDarshanLocators.update_popup_title)
       .first();
-    this.quickScheduleInput = page.locator(
-      LiveDarshanLocators.quick_schedule_input,
-    );
+    this.quickScheduleInput = page.getByRole("textbox", {
+      name: "Quick Schedule",
+    });
     this.dateInput = page.locator(LiveDarshanLocators.date_input);
     this.startTimeInput = page.locator(LiveDarshanLocators.start_time_input);
     this.timezoneInput = page.getByLabel(LiveDarshanLocators.timezone_input);
@@ -37,49 +37,58 @@ export class LiveDarshanPage {
     );
 
     // Actions
-    
-    this.createBtn = page.getByRole('button', { name: 'Create Live Darshan' })
-    this.updateBtn = page.locator(LiveDarshanLocators.update_btn);
-    this.cancelBtn = page.locator(LiveDarshanLocators.cancel_btn);
+
+    this.createBtn = page.getByRole("button", { name: "Create Live darshan" });
+    this.updateBtn = page.getByRole("button", { name: "Update Live darshan" });
+    this.cancelBtnX = page.locator(LiveDarshanLocators.cancel_btnX);
+    this.deletecancelBtn = page
+      .locator("button")
+      .filter({ hasText: "Cancel" })
+      .first();
 
     // Errors
-    this.meetingUrlError = page.locator(LiveDarshanLocators.meeting_url_error);
-    this.dateError = page.locator(LiveDarshanLocators.date_error);
-    this.startTimeError = page.locator(LiveDarshanLocators.start_time_error);
-    this.updateMeetingUrlError = page.locator(
-      LiveDarshanLocators.update_meeting_url_error,
+    this.meetingUrlRequiredError = page.getByText("Meeting URL is required", {
+      exact: true,
+    });
+    this.dateRequiredError = page.getByText("Date is required", {
+      exact: true,
+    });
+    this.startTimeRequiredError = page.getByText("Start time is required", {
+      exact: true,
+    });
+    this.invalidStartTimeError = page.getByText(
+      "Please select future time for today",
+      { exact: true },
     );
-    this.updateStartTimeError = page.locator(
-      LiveDarshanLocators.update_start_time_error,
-    );
+    this.invalidmeetingUrlError = page.getByText(/valid Zoom meeting URL/i);
 
-    this.createEditSuccessMsg = page.locator(
-      LiveDarshanLocators.create_edit_success_msg,
+    this.createEditDeleteSuccessMsg = page.locator(
+      LiveDarshanLocators.create_edit_delete_success_msg,
     );
   }
 
   async handleInput(locator, value) {
-    // 1️⃣ Skip if not applicable
-    if (value === null) {
-      return;
+    // 1️⃣ Skip null → no update
+    if (value === null || value === undefined) {
+      return false;
     }
 
-    // Get current value from UI
     const existingValue = await locator.inputValue();
 
-    // 2️⃣ Excel empty → only act if UI is also empty
+    // 2️⃣ Excel empty
     if (value === "") {
-      if (existingValue === "") {
-        // Both empty → do nothing (expected behavior)
-        return;
-      } else {
-        // UI has auto-filled value → DO NOT overwrite
-        return;
-      }
+      // UI empty or auto-filled → no change
+      return false;
     }
 
-    // 3️⃣ Normal value → overwrite safely
+    // 3️⃣ Same value → no change
+    if (existingValue === value) {
+      return false;
+    }
+
+    // 4️⃣ Value different → update
     await locator.fill(value);
+    return true; // ✅ CHANGED
   }
 
   async openCreatePopup() {
@@ -95,7 +104,35 @@ export class LiveDarshanPage {
   // 🔹 CREATE
   // ======================================================
 
-  async createLiveDarshan(data) {
+  // async createLiveDarshan(data) {
+  //   await this.openCreatePopup();
+
+  //   await this.handleInput(this.quickScheduleInput, data.quick_schedule);
+
+  //   const formattedDate = toInputDateFormat(data.date);
+  //   if (formattedDate) {
+  //     await this.handleInput(this.dateInput, formattedDate);
+  //   }
+
+  //   await this.handleInput(this.startTimeInput, data.start_time);
+  //   await this.handleInput(this.timezoneInput, data.timezone);
+
+  //   // 🔹 Auto Zoom logic
+  //   if (data.auto_zoom === "TRUE") {
+  //     // Auto Zoom ON → checkbox checked → meeting URL NOT required
+  //     await this.autoZoomCheckbox.check();
+  //   } else {
+  //     // Auto Zoom OFF → meeting URL required
+  //     await this.autoZoomCheckbox.uncheck();
+  //     await this.handleInput(this.meetingUrlInput, data.meeting_url);
+  //   }
+
+  //   await this.createBtn.click();
+
+  //   await findRowAndAction(this.page, data, "assertPresent");
+  // }
+
+  async createLiveDarshan(data, isErrorCase = false) {
     await this.openCreatePopup();
 
     await this.handleInput(this.quickScheduleInput, data.quick_schedule);
@@ -108,54 +145,105 @@ export class LiveDarshanPage {
     await this.handleInput(this.startTimeInput, data.start_time);
     await this.handleInput(this.timezoneInput, data.timezone);
 
-    // 🔹 Auto Zoom logic
     if (data.auto_zoom === "TRUE") {
-      // Auto Zoom ON → checkbox checked → meeting URL NOT required
       await this.autoZoomCheckbox.check();
     } else {
-      // Auto Zoom OFF → meeting URL required
       await this.autoZoomCheckbox.uncheck();
       await this.handleInput(this.meetingUrlInput, data.meeting_url);
     }
 
     await this.createBtn.click();
+
+    // 🚫 ERROR CASE → DO NOT SEARCH TABLE
+    if (isErrorCase) {
+      return;
+    }
+
+    // ✅ SUCCESS CASE → VERIFY ROW EXISTS
+    await findRowAndAction(this.page, data, "assertPresent");
   }
 
   // ======================================================
   // 🔹 UPDATE
   // ======================================================
 
-  async updateLiveDarshan(data) {
-    // 🔹 Auto Zoom ON → Edit disabled
-    // console.log("Auto Zoom value in Excel:", data.auto_zoom);
-    if (data.auto_zoom === "TRUE") {
-      await expect(this.editIcon).toBeDisabled();
+  async updateLiveDarshan(data, isErrorCase = false) {
+    // 1️⃣ Find row and click EDIT
+    await findRowAndAction(this.page, data, "edit");
+
+    await this.updatePopupTitle.waitFor({ state: "visible" });
+
+    let isUpdated = false;
+
+    // 2️⃣ Try updating fields
+    const formattedDate = toInputDateFormat(data.UpdateDate);
+    if (formattedDate) {
+      isUpdated ||= await this.handleInput(this.dateInput, formattedDate);
+    }
+
+    isUpdated ||= await this.handleInput(
+      this.startTimeInput,
+      data.UpdateStart_time,
+    );
+
+    isUpdated ||= await this.handleInput(
+      this.timezoneInput,
+      data.UpdateTimezone,
+    );
+
+    isUpdated ||= await this.handleInput(
+      this.meetingUrlInput,
+      data.UpdateMeeting_url,
+    );
+
+    // 🔸 CASE 1: NOTHING CHANGED → Update disabled
+    if (!isUpdated) {
+      await expect(this.updateBtn).toBeDisabled();
+      return; // ⛔ STOP → no table verification
+    }
+
+    // 🔸 CASE 2: CHANGE EXISTS
+    await expect(this.updateBtn).toBeEnabled();
+    await this.updateBtn.click();
+
+    // 🔸 CASE 3: ERROR EXPECTED → STOP
+    if (isErrorCase) {
       return;
     }
 
-    // 🔹 Auto Zoom OFF → Edit allowed
-    await this.editIcon.click();
-    await this.updatePopupTitle.waitFor({ state: "visible" });
-
-    const formattedDate = toInputDateFormat(data.date);
-    if (formattedDate) {
-      await this.handleInput(this.dateInput, formattedDate);
-    }
-
-    await this.handleInput(this.startTimeInput, data.start_time);
-    await this.handleInput(this.timezoneInput, data.timezone);
-
-    // 🔹 Only update meeting URL when auto zoom is OFF
-    await this.handleInput(this.meetingUrlInput, data.meeting_url);
-
-    await this.updateBtn.click();
+    // 🔸 CASE 4: SUCCESS → VERIFY UPDATED ROW
+    await findRowAndAction(
+      this.page,
+      {
+        date: data.UpdateDate ?? data.date,
+        start_time: data.UpdateStart_time ?? data.start_time,
+        timezone: data.UpdateTimezone ?? data.timezone,
+      },
+      "assertPresent",
+    );
   }
 
   // ======================================================
   // 🔹 DELETE
   // ======================================================
 
-  async deleteLiveDarshan() {
-    await this.deleteIcon.click();
+  async deleteLiveDarshan(data, isErrorCase = false) {
+    // 1️⃣ Find row and click DELETE
+    await findRowAndAction(this.page, data, "delete");
+
+    // 2️⃣ Confirm delete
+    await this.page
+      .locator("button")
+      .filter({ hasText: "Yes,delete" })
+      .last()
+      .click();
+
+    // 🔸 ERROR CASE (if any validation later)
+    if (isErrorCase) {
+      return;
+    }
+
+    // 3️⃣ VERIFY ROW IS GONE
+    await findRowAndAction(this.page, data, "assertNotPresent");
   }
 }

@@ -10,34 +10,28 @@ export const LiveDarshanAssertions = {
     await expect(liveDarshanPage.title).toBeVisible();
   },
   // 🔹 Create Live Darshan
-  create_edit_success_msg: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.createEditSuccessMsg).toBeVisible();
+  create_edit_delete_success_msg: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.createEditDeleteSuccessMsg).toBeVisible();
   },
-
-  // 🔹 Delete Live Darshan
-  darshan_deleted: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.videoIcon).not.toBeVisible();
-  },
-
   // 🔹 Validation Errors
-  meeting_url_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.meetingUrlError).toBeVisible();
+  meetingUrl_required_error: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.meetingUrlRequiredError).toBeVisible();
   },
 
-  update_meeting_url_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.updateMeetingUrlError).toBeVisible();
+  invalid_meetingUrl_error: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.invalidmeetingUrlError).toBeVisible();
   },
 
-  date_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.dateError).toBeVisible();
+  date_required_error: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.dateRequiredError).toBeVisible();
   },
 
-  update_start_time_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.updateStartTimeError).toBeVisible();
+  startTime_required_error: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.startTimeRequiredError).toBeVisible();
   },
 
-  start_time_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.startTimeError).toBeVisible();
+  invalid_startTime_error: async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.invalidStartTimeError).toBeVisible();
   },
 
   // 🔹 Popup validation
@@ -47,4 +41,9 @@ export const LiveDarshanAssertions = {
   edit_disabled: async ({ liveDarshanPage }) => {
     await expect(liveDarshanPage.editIcon).toBeDisabled();
   },
+
+  update_disabled :async ({ liveDarshanPage }) => {
+    await expect(liveDarshanPage.updateBtn).toBeDisabled();
+  },
+
 };

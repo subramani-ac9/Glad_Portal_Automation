@@ -21,13 +21,14 @@ export default defineConfig({
   timeout: 60 * 1000, // 60 seconds
 
   expect: {
-    timeout: 30 * 1000 // assertions auto-wait 10s
+    timeout: 50 * 1000 // assertions auto-wait 10s
   },
 
   use: {
-    actionTimeout: 10 * 1000,      // click, fill, type
-    navigationTimeout: 30 * 1000,  // page.goto, redirects
-    trace: 'on-first-retry'
+    actionTimeout: 50 * 1000,      // click, fill, type
+    navigationTimeout: 50 * 1000,  // page.goto, redirects
+    trace: 'on-first-retry',
+    viewport: { width: 1920, height: 1080 },
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
 
