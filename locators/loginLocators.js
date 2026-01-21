@@ -3,6 +3,8 @@ export const loginLocators = {
   passwordInput: "[name='password']",
   loginButton: "//span[text()='Sign In']/ancestor::button",
                         
-  emailRequiredError: 'xpath=/html[1]/body[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/form[1]/div[1]/div[1]/div[2]',
-  passwordRequiredError: 'xpath=/html[1]/body[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/form[1]/div[2]/div[1]/div[1]/div[2]',
+  emailRequiredError: "//div[text()='Email is required']",
+  passwordRequiredError: "//div[text()='Password is required']",
+  error_msg:"//div[text()='Invalid email or password. Please try again or click Forgot Password to reset.']",
+  invalidEmailError:"//div[text()='Invalid email address']",
 };

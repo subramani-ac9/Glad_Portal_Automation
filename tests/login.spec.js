@@ -6,7 +6,14 @@ import { readSheet } from "../utils/sheetReader";
 import { LOGIN_SHEET_URL } from "../utils/config";
 import { validateResult } from "../utils/validateResult";
 
-const testData = await readSheet(LOGIN_SHEET_URL);
+let testData = await readSheet(LOGIN_SHEET_URL);
+console.log(testData);
+testData = testData.filter((data) => {
+    if (data.execute?.toLowerCase() === "run") {
+      // console.log(data);
+      return data;
+    }
+  });
 
 test.describe("Login Tests (Google Sheet)", () => {
   for (const data of testData) {

@@ -8,7 +8,8 @@ export class LoginPage {
     this.email = page.locator(loginLocators.emailInput);
     this.password = page.locator(loginLocators.passwordInput);
     this.loginBtn = page.locator(loginLocators.loginButton);
-
+    this.error_msg=page.locator(loginLocators.error_msg);
+    this.invalidEmailError=page.locator(loginLocators.invalidEmailError);
     this.emailError = page.locator(loginLocators.emailRequiredError);
     this.passwordError = page.locator(loginLocators.passwordRequiredError);
   }
