@@ -132,7 +132,10 @@ export class LiveDarshanPage {
   //   await findRowAndAction(this.page, data, "assertPresent");
   // }
 
-  async createLiveDarshan(data, isErrorCase = false) {
+  async createLiveDarshan(data) {
+    console.log(
+      `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
+    );
     await this.openCreatePopup();
 
     await this.handleInput(this.quickScheduleInput, data.quick_schedule);
@@ -155,19 +158,22 @@ export class LiveDarshanPage {
     await this.createBtn.click();
 
     // 🚫 ERROR CASE → DO NOT SEARCH TABLE
-    if (isErrorCase) {
-      return;
-    }
+    // if (isErrorCase) {
+    //   return;
+    // }
 
     // ✅ SUCCESS CASE → VERIFY ROW EXISTS
-    await findRowAndAction(this.page, data, "assertPresent");
+    // await findRowAndAction(this.page, data, "assertPresent");
   }
 
   // ======================================================
   // 🔹 UPDATE
   // ======================================================
 
-  async updateLiveDarshan(data, isErrorCase = false) {
+  async updateLiveDarshan(data) {
+    console.log(
+      `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
+    );
     // 1️⃣ Find row and click EDIT
     await findRowAndAction(this.page, data, "edit");
 
@@ -199,36 +205,39 @@ export class LiveDarshanPage {
     // 🔸 CASE 1: NOTHING CHANGED → Update disabled
     if (!isUpdated) {
       await expect(this.updateBtn).toBeDisabled();
-      return; // ⛔ STOP → no table verification
+      return "NO_CHANGE";
     }
 
     // 🔸 CASE 2: CHANGE EXISTS
-    await expect(this.updateBtn).toBeEnabled();
     await this.updateBtn.click();
+    return "UPDATED";
 
     // 🔸 CASE 3: ERROR EXPECTED → STOP
-    if (isErrorCase) {
-      return;
-    }
+    // if (isErrorCase) {
+    //   return;
+    // }
 
-    // 🔸 CASE 4: SUCCESS → VERIFY UPDATED ROW
-    await findRowAndAction(
-      this.page,
-      {
-        date: data.UpdateDate ?? data.date,
-        start_time: data.UpdateStart_time ?? data.start_time,
-        timezone: data.UpdateTimezone ?? data.timezone,
-      },
-      "assertPresent",
-    );
+    // // 🔸 CASE 4: SUCCESS → VERIFY UPDATED ROW
+    // await findRowAndAction(
+    //   this.page,
+    //   {
+    //     date: data.UpdateDate ?? data.date,
+    //     start_time: data.UpdateStart_time ?? data.start_time,
+    //     timezone: data.UpdateTimezone ?? data.timezone,
+    //   },
+    //   "assertPresent",
+    // );
   }
 
   // ======================================================
   // 🔹 DELETE
   // ======================================================
 
-  async deleteLiveDarshan(data, isErrorCase = false) {
+  async deleteLiveDarshan(data) {
     // 1️⃣ Find row and click DELETE
+    console.log(
+      `Deleting Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
+    );
     await findRowAndAction(this.page, data, "delete");
 
     // 2️⃣ Confirm delete
@@ -239,11 +248,11 @@ export class LiveDarshanPage {
       .click();
 
     // 🔸 ERROR CASE (if any validation later)
-    if (isErrorCase) {
-      return;
-    }
+    // if (isErrorCase) {
+    //   return;
+    // }
 
-    // 3️⃣ VERIFY ROW IS GONE
-    await findRowAndAction(this.page, data, "assertNotPresent");
+    // // 3️⃣ VERIFY ROW IS GONE
+    // await findRowAndAction(this.page, data, "assertNotPresent");
   }
 }

@@ -143,9 +143,10 @@ export async function findRowAndAction(page, data, operation) {
   const uiDate = formatDateForUI(data.date);
 
   // Always start from first page
-  const firstPageBtn = page.getByRole("button", { name: "1" });
-  if (await firstPageBtn.isVisible()) {
-    await firstPageBtn.click();
+  const PreviousPageBtn = page.getByRole("button", { name: "Previous" });
+
+  while(await PreviousPageBtn.isEnabled()) {
+    await PreviousPageBtn.click();
     await page.waitForLoadState("networkidle");
   }
 
@@ -189,12 +190,15 @@ export async function findRowAndAction(page, data, operation) {
         continue;
       }
 
+      console.log(`Checking → ${dateCell} | ${timeCell} | ${timezoneCell}`);
+
       if (
         dateCell.includes(uiDate) &&
         timeCell.includes(data.start_time) &&
         timezoneCell.includes(data.timezone)
       ) {
         found = true;
+        console.log("✅ MATCH FOUND");
 
         // 🔹 Existing behavior (UNCHANGED)
         if (operation === "edit") {
@@ -231,6 +235,7 @@ export async function findRowAndAction(page, data, operation) {
 
     if (await nextButton.isDisabled()) {
       if (!retrySamePageOnce) {
+        console.log("⏳ Next disabled — retrying same page once...");
         retrySamePageOnce = true;
         await page.waitForTimeout(3000);
         continue;
