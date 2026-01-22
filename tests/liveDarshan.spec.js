@@ -14,12 +14,18 @@ const runnableTests = testData.filter((data) => {
   }
 });
 
+function resolveFinal(newValue, oldValue) {
+  if (newValue === null || newValue === undefined) return oldValue;
+  if (newValue === "") return ""; // validation case
+  return newValue;
+}
+
 test.describe("Live Darshan – Sheet Driven Tests", () => {
   test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto("login");
     await loginPage.login(
-      "test-tenant-admin-us@abovecloud9.ai",
+      "test-tenant-admin-in@abovecloud9.ai",
       "Abovecloud@ac9",
     );
   });
@@ -37,39 +43,48 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
 
       switch (data.action.toLowerCase()) {
         case "create":
-          await liveDarshanPage.createLiveDarshan(data);
+          const createdData = await liveDarshanPage.createLiveDarshan(data);
 
-          //result
           await validateResult(expectedValues, { liveDarshanPage });
-
+          console.log("created data:", createdData);
           if (!errorExpected) {
-            await findRowAndAction(page, data, "assertPresent");
-          } else {
-            await liveDarshanPage.cancelBtnX.click(); // cleanup
+            // Fetch auto-filled values from UI
+            await findRowAndAction(page, createdData, "assertPresent");
           }
-
           break;
 
         case "update":
-          const updateResult = await liveDarshanPage.updateLiveDarshan(data);
+          const result = await liveDarshanPage.updateLiveDarshan(data);
+          
+          await validateResult(expectedValues, { liveDarshanPage });
 
-          if (updateResult === "NO_CHANGE") {
+          if (data.auto_zoom === "TRUE") {
+            const row = await findRowAndAction(page, data, "getRow");
             break;
           }
 
-          //result
-          await validateResult(expectedValues, { liveDarshanPage });
-          if (!errorExpected) {
-            await findRowAndAction(
-              page,
-              {
-                date: data.UpdateDate ?? data.date,
-                start_time: data.UpdateStart_time ?? data.start_time,
-                timezone: data.UpdateTimezone ?? data.timezone,
-              },
-              "assertPresent",
-            );
-          } else {
+          await validateResult(expectedValues, { liveDarshanPage, row });
+
+
+          if (!errorExpected && result.status === "UPDATED") {
+            const verifyData = {
+              date: resolveFinal(data.UpdateDate, result.existing.date),
+              start_time: resolveFinal(
+                data.UpdateStart_time,
+                result.existing.start_time,
+              ),
+              timezone: resolveFinal(
+                data.UpdateTimezone,
+                result.existing.timezone,
+              ),
+            };
+
+            console.log("verifing data after update:", verifyData);
+
+            await findRowAndAction(page, verifyData, "assertPresent");
+          }
+
+          if (errorExpected) {
             await liveDarshanPage.cancelBtnX.click();
           }
           break;

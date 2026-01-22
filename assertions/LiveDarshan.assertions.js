@@ -38,11 +38,16 @@ export const LiveDarshanAssertions = {
   create_popup_opened: async ({ liveDarshanPage }) => {
     await expect(liveDarshanPage.popupTitle).toBeVisible();
   },
-  edit_disabled: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.editIcon).toBeDisabled();
+  // edit_disabled_error: async ({ liveDarshanPage }) => {
+  //   await expect(liveDarshanPage.editIcon).toBeDisabled();
+  // },
+
+  edit_disabled_error: async ({ row }) => {
+    const editBtn = row.getByAltText("Edit icon").first();
+    await expect(editBtn).toBeDisabled();
   },
 
-  update_disabled :async ({ liveDarshanPage }) => {
+  update_disabled_error :async ({ liveDarshanPage }) => {
     await expect(liveDarshanPage.updateBtn).toBeDisabled();
   },
 

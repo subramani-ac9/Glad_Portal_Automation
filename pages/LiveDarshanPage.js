@@ -68,27 +68,27 @@ export class LiveDarshanPage {
   }
 
   async handleInput(locator, value) {
-    // 1️⃣ Skip null → no update
-    if (value === null || value === undefined) {
+    // 1️⃣ null / undefined → SKIP
+    if (value === null || value === undefined || value === "null") {
       return false;
+    }
+
+    // 2️⃣ Empty string → CLEAR FIELD (trigger required error)
+    if (value === "") {
+      await locator.fill("");
+      return true;
     }
 
     const existingValue = await locator.inputValue();
 
-    // 2️⃣ Excel empty
-    if (value === "") {
-      // UI empty or auto-filled → no change
-      return false;
-    }
-
-    // 3️⃣ Same value → no change
+    // 3️⃣ Same value → NO CHANGE
     if (existingValue === value) {
       return false;
     }
 
-    // 4️⃣ Value different → update
+    // 4️⃣ Different value → UPDATE
     await locator.fill(value);
-    return true; // ✅ CHANGED
+    return true;
   }
 
   async openCreatePopup() {
@@ -134,7 +134,7 @@ export class LiveDarshanPage {
 
   async createLiveDarshan(data) {
     console.log(
-      `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
+      `Creating Live Darshan with data:, ${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
     );
     await this.openCreatePopup();
 
@@ -155,35 +155,85 @@ export class LiveDarshanPage {
       await this.handleInput(this.meetingUrlInput, data.meeting_url);
     }
 
+    const createdData = {
+      date: await this.dateInput.inputValue(),
+      start_time: await this.startTimeInput.inputValue(),
+      timezone: await this.timezoneInput.inputValue(),
+    };
+
     await this.createBtn.click();
 
-    // 🚫 ERROR CASE → DO NOT SEARCH TABLE
-    // if (isErrorCase) {
-    //   return;
-    // }
-
-    // ✅ SUCCESS CASE → VERIFY ROW EXISTS
-    // await findRowAndAction(this.page, data, "assertPresent");
+    return createdData;
   }
 
   // ======================================================
   // 🔹 UPDATE
   // ======================================================
 
+  // async updateLiveDarshan(data) {
+  //   console.log(
+  //     `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
+  //   );
+  //   // 1️⃣ Find row and click EDIT
+  //   let obj = await findRowAndAction(this.page, data, "edit");
+  //   if (obj.autozoom) {
+  //     return obj.editIcon;
+  //   }
+
+  //   await this.updatePopupTitle.waitFor({ state: "visible" });
+
+  //   let isUpdated = false;
+
+  //   // 2️⃣ Try updating fields
+  //   const formattedDate = toInputDateFormat(data.UpdateDate);
+  //   if (formattedDate) {
+  //     isUpdated ||= await this.handleInput(this.dateInput, formattedDate);
+  //   }
+
+  //   isUpdated ||= await this.handleInput(
+  //     this.startTimeInput,
+  //     data.UpdateStart_time,
+  //   );
+
+  //   isUpdated ||= await this.handleInput(
+  //     this.timezoneInput,
+  //     data.UpdateTimezone,
+  //   );
+
+  //   isUpdated ||= await this.handleInput(
+  //     this.meetingUrlInput,
+  //     data.UpdateMeeting_url,
+  //   );
+
+  //   // 🔸 CASE 1: NOTHING CHANGED → Update disabled
+  //   if (!isUpdated) {
+  //     await expect(this.updateBtn).toBeDisabled();
+  //     return;
+  //   }
+
+  //   // 🔸 CASE 2: CHANGE EXISTS
+  //   await this.updateBtn.click();
+  //   return;
+  // }
+
   async updateLiveDarshan(data) {
+    const result = await findRowAndAction(this.page, data, "edit");
     console.log(
-      `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
+      `Updating Live Darshan with data:${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
     );
-    // 1️⃣ Find row and click EDIT
-    await findRowAndAction(this.page, data, "edit");
+    if (result?.autozoom) {
+      return { status: "AUTO_ZOOM", existing: result.existingData };
+    }
+
+    const existing = result.existingData;
+    console.log("existing data in update:", existing);
 
     await this.updatePopupTitle.waitFor({ state: "visible" });
 
     let isUpdated = false;
 
-    // 2️⃣ Try updating fields
     const formattedDate = toInputDateFormat(data.UpdateDate);
-    if (formattedDate) {
+    if (formattedDate !== null) {
       isUpdated ||= await this.handleInput(this.dateInput, formattedDate);
     }
 
@@ -202,31 +252,15 @@ export class LiveDarshanPage {
       data.UpdateMeeting_url,
     );
 
-    // 🔸 CASE 1: NOTHING CHANGED → Update disabled
+    // 🔸 NO CHANGE
     if (!isUpdated) {
       await expect(this.updateBtn).toBeDisabled();
-      return "NO_CHANGE";
+      return { status: "NO_CHANGE", existing };
     }
 
-    // 🔸 CASE 2: CHANGE EXISTS
     await this.updateBtn.click();
-    return "UPDATED";
 
-    // 🔸 CASE 3: ERROR EXPECTED → STOP
-    // if (isErrorCase) {
-    //   return;
-    // }
-
-    // // 🔸 CASE 4: SUCCESS → VERIFY UPDATED ROW
-    // await findRowAndAction(
-    //   this.page,
-    //   {
-    //     date: data.UpdateDate ?? data.date,
-    //     start_time: data.UpdateStart_time ?? data.start_time,
-    //     timezone: data.UpdateTimezone ?? data.timezone,
-    //   },
-    //   "assertPresent",
-    // );
+    return { status: "UPDATED", existing };
   }
 
   // ======================================================
@@ -246,13 +280,5 @@ export class LiveDarshanPage {
       .filter({ hasText: "Yes,delete" })
       .last()
       .click();
-
-    // 🔸 ERROR CASE (if any validation later)
-    // if (isErrorCase) {
-    //   return;
-    // }
-
-    // // 3️⃣ VERIFY ROW IS GONE
-    // await findRowAndAction(this.page, data, "assertNotPresent");
   }
 }

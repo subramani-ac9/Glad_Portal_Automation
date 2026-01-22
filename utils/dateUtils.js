@@ -3,30 +3,50 @@ import { expect } from "@playwright/test";
 export function toInputDateFormat(dateStr) {
   if (!dateStr || dateStr === "null") return null;
 
-  // Accepts DD-MM-YYYY
-  const [dd, mm, yyyy] = dateStr.split("-");
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return null;
 
-  if (!dd || !mm || !yyyy) return null;
+  let day, month, year;
 
-  return `${yyyy}-${mm}-${dd}`; // HTML date format
+  // YYYY-MM-DD
+  if (parts[0].length === 4) {
+    [year, month, day] = parts;
+  }
+  // DD-MM-YYYY
+  else {
+    [day, month, year] = parts;
+  }
+
+  if (!day || !month || !year) return null;
+
+  return `${year}-${month}-${day}`; // HTML input[type=date]
 }
 
-export function formatDateForUI(sheetDate) {
-  console.log("Formatting date for UI:", sheetDate);
-  const [day, month, year] = sheetDate.split("-");
-  const dateObj = new Date(`${year}-${month}-${day}`);
+export function formatDateForUI(dateStr) {
+  const normalized = toInputDateFormat(dateStr);
+  if (!normalized) return "";
 
-  const formatted = dateObj.toLocaleDateString("en-US", {
+  const [year, month, day] = normalized.split("-");
+
+  const dateObj = new Date(Number(year), Number(month) - 1, Number(day));
+
+  return dateObj.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
     year: "numeric",
   });
-
-  return formatted; // "Jun 20, 2044"
 }
 
 function normalize(text) {
   return text.replace(/\s+/g, " ").trim();
+}
+
+export async function getRowData(row) {
+  return {
+    date: normalize(await row.locator("td").nth(0).innerText()),
+    start_time: normalize(await row.locator("td").nth(1).innerText()),
+    timezone: normalize(await row.locator("td").nth(2).innerText()),
+  };
 }
 
 // export async function findRowAndAction(page, data, operation) {
@@ -140,12 +160,14 @@ export function isErrorExpected(expected) {
 }
 
 export async function findRowAndAction(page, data, operation) {
+  console.log(data.date);
   const uiDate = formatDateForUI(data.date);
+  console.log(uiDate, data.start_time, data.timezone);
 
   // Always start from first page
   const PreviousPageBtn = page.getByRole("button", { name: "Previous" });
 
-  while(await PreviousPageBtn.isEnabled()) {
+  while (await PreviousPageBtn.isEnabled()) {
     await PreviousPageBtn.click();
     await page.waitForLoadState("networkidle");
   }
@@ -201,16 +223,29 @@ export async function findRowAndAction(page, data, operation) {
         console.log("✅ MATCH FOUND");
 
         // 🔹 Existing behavior (UNCHANGED)
+        // if (operation === "edit") {
+        //   const editIcon = row.getByAltText("Edit icon");
+
+        //   if (data.auto_zoom === "TRUE") {
+        //     await expect(editIcon).toBeDisabled();
+        //     return {autozoom: data.auto_zoom ,editIcon};
+        //   }
+
+        //   await editIcon.click();
+        //   return  data.auto_zoom;
+        // }
+
         if (operation === "edit") {
           const editIcon = row.getByAltText("Edit icon");
 
+          const existingData = await getRowData(row);
           if (data.auto_zoom === "TRUE") {
             await expect(editIcon).toBeDisabled();
-            return;
+            return { autozoom: true, existingData };
           }
 
           await editIcon.click();
-          return;
+          return { autozoom: false, existingData };
         }
 
         if (operation === "delete") {
@@ -222,6 +257,8 @@ export async function findRowAndAction(page, data, operation) {
         if (operation === "find") {
           return true;
         }
+
+        if (operation === "getRow") return row;
 
         if (operation === "assertPresent") {
           expect(true).toBeTruthy();
