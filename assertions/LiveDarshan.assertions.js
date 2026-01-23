@@ -1,54 +1,91 @@
 import { expect } from "@playwright/test";
+import { LiveDarshanLocators } from "../locators/LiveDarshanLocators";
 
 export const LiveDarshanAssertions = {
-  // 🔹 Dashboard / Page Load
-  AOL_icon_dashboard: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.aolIcon).toBeVisible();
+  // 🔹 PAGE LEVEL ASSERTIONS
+  AOL_icon_dashboard: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.aolIcon).toBeVisible();
+    },
   },
 
-  live_darshan_title_visible: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.title).toBeVisible();
-  },
-  // 🔹 Create Live Darshan
-  create_edit_delete_success_msg: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.createEditDeleteSuccessMsg).toBeVisible();
-  },
-  // 🔹 Validation Errors
-  meetingUrl_required_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.meetingUrlRequiredError).toBeVisible();
+  live_darshan_title_visible: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.title).toBeVisible();
+    },
   },
 
-  invalid_meetingUrl_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.invalidmeetingUrlError).toBeVisible();
+  create_edit_delete_success_msg: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.createEditDeleteSuccessMsg).toBeVisible();
+    },
   },
 
-  date_required_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.dateRequiredError).toBeVisible();
+  meetingUrl_required_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.meetingUrlRequiredError).toBeVisible();
+    },
   },
 
-  startTime_required_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.startTimeRequiredError).toBeVisible();
+  invalid_meetingUrl_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.invalidmeetingUrlError).toBeVisible();
+    },
   },
 
-  invalid_startTime_error: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.invalidStartTimeError).toBeVisible();
+  date_required_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.dateRequiredError).toBeVisible();
+    },
   },
 
-  // 🔹 Popup validation
-  create_popup_opened: async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.popupTitle).toBeVisible();
-  },
-  // edit_disabled_error: async ({ liveDarshanPage }) => {
-  //   await expect(liveDarshanPage.editIcon).toBeDisabled();
-  // },
-
-  edit_disabled_error: async ({ row }) => {
-    const editBtn = row.getByAltText("Edit icon").first();
-    await expect(editBtn).toBeDisabled();
+  startTime_required_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.startTimeRequiredError).toBeVisible();
+    },
   },
 
-  update_disabled_error :async ({ liveDarshanPage }) => {
-    await expect(liveDarshanPage.updateBtn).toBeDisabled();
+  invalid_startTime_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.invalidStartTimeError).toBeVisible();
+    },
+  },
+  paststartTime_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.PastStartTimeError).toBeVisible();
+    },
   },
 
+  update_disabled_error: {
+    scope: "page",
+    fn: async ({ liveDarshanPage }) => {
+      await expect(liveDarshanPage.updateBtn).toBeDisabled();
+    },
+  },
+
+  past_date_error: {
+    scope: "row",
+    fn: async ({ row }) => {
+      const dateInput = row.locator(LiveDarshanLocators.date_input);
+      expect(await dateInput.evaluate((el) => el.checkValidity())).toBe(false);
+    },
+  },
+
+  // 🔹 ROW LEVEL ASSERTIONS
+  edit_disabled_error: {
+    scope: "row",
+    fn: async ({ row }) => {
+      const editBtn = row.getByAltText("Edit icon");
+      await expect(editBtn).toBeDisabled();
+    },
+  },
 };

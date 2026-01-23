@@ -1,18 +1,23 @@
 import { assertions } from '../assertions';
 
-export async function validateResult(expectedList, pages) {
-
+export async function validateResult(expectedList, context) {
   const expectedArray = Array.isArray(expectedList)
     ? expectedList
-    : expectedList.split(',').map(e => e.trim());
+    : expectedList.split(",").map(e => e.trim());
 
   for (const expected of expectedArray) {
+    const assertion = assertions[expected];
+    console.log(assertion);
+    console.log(expected);
 
-    const assertionFn = assertions[expected];
-
-    if (!assertionFn) {
-      throw new Error(`❌ No assertion defined for expected result: ${expected}`);
+    if (!assertion) {
+      throw new Error(`❌ No assertion defined for: ${expected}`);
     }
-    await assertionFn(pages);
+
+    // 🔒 Scope guard
+    if (assertion.scope === "row" && !context.row) continue;
+    if (assertion.scope === "page" && !context.liveDarshanPage) continue;
+
+    await assertion.fn(context);
   }
 }

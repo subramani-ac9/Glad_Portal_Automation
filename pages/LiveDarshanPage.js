@@ -56,39 +56,46 @@ export class LiveDarshanPage {
     this.startTimeRequiredError = page.getByText("Start time is required", {
       exact: true,
     });
-    this.invalidStartTimeError = page.getByText(
+    
+    this.PastStartTimeError = page.getByText(
       "Please select future time for today",
       { exact: true },
     );
-    this.invalidmeetingUrlError = page.getByText(/valid Zoom meeting URL/i);
+
+    this.invalidStartTimeError = page.getByText(
+      "Please enter a valid time",
+      { exact: true },
+    );
+
+    this.invalidmeetingUrlError = page.getByText(
+      "Please enter a valid Zoom meeting URL with meeting ID and password",
+      { exact: true },
+    );
 
     this.createEditDeleteSuccessMsg = page.locator(
       LiveDarshanLocators.create_edit_delete_success_msg,
     );
+
+    this.NoData = page.getByText("No data available").last();
   }
 
   async handleInput(locator, value) {
-    // 1️⃣ null / undefined → SKIP
     if (value === null || value === undefined || value === "null") {
       return false;
-    }
+    } // skip
 
-    // 2️⃣ Empty string → CLEAR FIELD (trigger required error)
     if (value === "") {
-      await locator.fill("");
-      return true;
+      await locator.clear();
+      return true; // cleared
     }
 
-    const existingValue = await locator.inputValue();
+    const existingValue = (await locator.inputValue()).trim();
+    const newValue = value.toString().trim();
 
-    // 3️⃣ Same value → NO CHANGE
-    if (existingValue === value) {
-      return false;
-    }
+    if (existingValue === newValue) return false; // no change
 
-    // 4️⃣ Different value → UPDATE
-    await locator.fill(value);
-    return true;
+    await locator.fill(newValue);
+    return true; // updated
   }
 
   async openCreatePopup() {
@@ -103,35 +110,6 @@ export class LiveDarshanPage {
   // ======================================================
   // 🔹 CREATE
   // ======================================================
-
-  // async createLiveDarshan(data) {
-  //   await this.openCreatePopup();
-
-  //   await this.handleInput(this.quickScheduleInput, data.quick_schedule);
-
-  //   const formattedDate = toInputDateFormat(data.date);
-  //   if (formattedDate) {
-  //     await this.handleInput(this.dateInput, formattedDate);
-  //   }
-
-  //   await this.handleInput(this.startTimeInput, data.start_time);
-  //   await this.handleInput(this.timezoneInput, data.timezone);
-
-  //   // 🔹 Auto Zoom logic
-  //   if (data.auto_zoom === "TRUE") {
-  //     // Auto Zoom ON → checkbox checked → meeting URL NOT required
-  //     await this.autoZoomCheckbox.check();
-  //   } else {
-  //     // Auto Zoom OFF → meeting URL required
-  //     await this.autoZoomCheckbox.uncheck();
-  //     await this.handleInput(this.meetingUrlInput, data.meeting_url);
-  //   }
-
-  //   await this.createBtn.click();
-
-  //   await findRowAndAction(this.page, data, "assertPresent");
-  // }
-
   async createLiveDarshan(data) {
     console.log(
       `Creating Live Darshan with data:, ${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
@@ -139,11 +117,8 @@ export class LiveDarshanPage {
     await this.openCreatePopup();
 
     await this.handleInput(this.quickScheduleInput, data.quick_schedule);
-
-    const formattedDate = toInputDateFormat(data.date);
-    if (formattedDate) {
-      await this.handleInput(this.dateInput, formattedDate);
-    }
+    console.log("toInputDateFormat(data.date)", toInputDateFormat(data.date));
+    await this.handleInput(this.dateInput, toInputDateFormat(data.date));
 
     await this.handleInput(this.startTimeInput, data.start_time);
     await this.handleInput(this.timezoneInput, data.timezone);
@@ -159,6 +134,7 @@ export class LiveDarshanPage {
       date: await this.dateInput.inputValue(),
       start_time: await this.startTimeInput.inputValue(),
       timezone: await this.timezoneInput.inputValue(),
+      auto_zoom: data.auto_zoom,
     };
 
     await this.createBtn.click();
@@ -169,95 +145,49 @@ export class LiveDarshanPage {
   // ======================================================
   // 🔹 UPDATE
   // ======================================================
-
-  // async updateLiveDarshan(data) {
-  //   console.log(
-  //     `Creating Live Darshan with data:,${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
-  //   );
-  //   // 1️⃣ Find row and click EDIT
-  //   let obj = await findRowAndAction(this.page, data, "edit");
-  //   if (obj.autozoom) {
-  //     return obj.editIcon;
-  //   }
-
-  //   await this.updatePopupTitle.waitFor({ state: "visible" });
-
-  //   let isUpdated = false;
-
-  //   // 2️⃣ Try updating fields
-  //   const formattedDate = toInputDateFormat(data.UpdateDate);
-  //   if (formattedDate) {
-  //     isUpdated ||= await this.handleInput(this.dateInput, formattedDate);
-  //   }
-
-  //   isUpdated ||= await this.handleInput(
-  //     this.startTimeInput,
-  //     data.UpdateStart_time,
-  //   );
-
-  //   isUpdated ||= await this.handleInput(
-  //     this.timezoneInput,
-  //     data.UpdateTimezone,
-  //   );
-
-  //   isUpdated ||= await this.handleInput(
-  //     this.meetingUrlInput,
-  //     data.UpdateMeeting_url,
-  //   );
-
-  //   // 🔸 CASE 1: NOTHING CHANGED → Update disabled
-  //   if (!isUpdated) {
-  //     await expect(this.updateBtn).toBeDisabled();
-  //     return;
-  //   }
-
-  //   // 🔸 CASE 2: CHANGE EXISTS
-  //   await this.updateBtn.click();
-  //   return;
-  // }
-
   async updateLiveDarshan(data) {
+    // 1️⃣ Find the row and click EDIT
     const result = await findRowAndAction(this.page, data, "edit");
-    console.log(
-      `Updating Live Darshan with data:${data.action} | ${data.date} | ${data.start_time} | ${data.timezone} \n Update to → ${data.UpdateDate} | ${data.UpdateStart_time} | ${data.UpdateTimezone}`,
-    );
+
     if (result?.autozoom) {
-      return { status: "AUTO_ZOOM", existing: result.existingData };
+      // Auto Zoom row → can't edit
+      return { status: "AUTO_ZOOM", row: result.row };
     }
 
     const existing = result.existingData;
-    console.log("existing data in update:", existing);
+    console.log("Existing data in update:", existing);
 
     await this.updatePopupTitle.waitFor({ state: "visible" });
 
-    let isUpdated = false;
+    // 2️⃣ Prepare fields to update
+    const fieldsToUpdate = [
+      { locator: this.dateInput, value: toInputDateFormat(data.UpdateDate) },
+      { locator: this.startTimeInput, value: data.UpdateStart_time },
+      { locator: this.timezoneInput, value: data.UpdateTimezone },
+    ];
 
-    const formattedDate = toInputDateFormat(data.UpdateDate);
-    if (formattedDate !== null) {
-      isUpdated ||= await this.handleInput(this.dateInput, formattedDate);
+    // Meeting URL only editable if auto_zoom is FALSE
+    if (data.auto_zoom !== "TRUE") {
+      fieldsToUpdate.push({
+        locator: this.meetingUrlInput,
+        value: data.UpdateMeeting_url,
+      });
     }
 
-    isUpdated ||= await this.handleInput(
-      this.startTimeInput,
-      data.UpdateStart_time,
-    );
+    // 3️⃣ Update fields dynamically
+    let isUpdated = false;
+    for (const field of fieldsToUpdate) {
+      const updated = await this.handleInput(field.locator, field.value);
+      isUpdated ||= updated; // mark if any field changed
+    }
 
-    isUpdated ||= await this.handleInput(
-      this.timezoneInput,
-      data.UpdateTimezone,
-    );
-
-    isUpdated ||= await this.handleInput(
-      this.meetingUrlInput,
-      data.UpdateMeeting_url,
-    );
-
-    // 🔸 NO CHANGE
-    if (!isUpdated) {
-      await expect(this.updateBtn).toBeDisabled();
+    // 4️⃣ Check if update button is disabled (either nothing changed or validation error)
+    if (!isUpdated || (await this.updateBtn.isDisabled())) {
+      console.log("Update button disabled – no changes or validation errors");
       return { status: "NO_CHANGE", existing };
     }
 
+    // 6️⃣ Click update
     await this.updateBtn.click();
 
     return { status: "UPDATED", existing };

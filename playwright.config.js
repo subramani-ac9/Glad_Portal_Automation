@@ -28,6 +28,8 @@ export default defineConfig({
     actionTimeout: 50 * 1000,      // click, fill, type
     navigationTimeout: 50 * 1000,  // page.goto, redirects
     trace: 'on-first-retry',
+    screenshot:'only-on-failure',
+    video:'on',
     viewport: { width: 1920, height: 1080 },
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
