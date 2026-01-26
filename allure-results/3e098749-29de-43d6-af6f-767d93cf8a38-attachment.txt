@@ -1,0 +1,7 @@
+ 
+required_email,required_password
+[ 'required_email', 'required_password' ]
+{ scope: 'page', fn: [AsyncFunction: fn] }
+required_email
+{ scope: 'page', fn: [AsyncFunction: fn] }
+required_password

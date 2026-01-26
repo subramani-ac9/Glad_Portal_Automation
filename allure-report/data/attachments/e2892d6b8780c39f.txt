@@ -1,0 +1,5 @@
+test-test Abovecloud@ac9
+invalidEmailError
+[ 'invalidEmailError' ]
+{ scope: 'page', fn: [AsyncFunction: fn] }
+invalidEmailError
