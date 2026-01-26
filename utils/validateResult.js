@@ -7,9 +7,6 @@ export async function validateResult(expectedList, context) {
 
   for (const expected of expectedArray) {
     const assertion = assertions[expected];
-    console.log(assertion);
-    console.log(expected);
-
     if (!assertion) {
       throw new Error(`❌ No assertion defined for: ${expected}`);
     }
