@@ -120,6 +120,16 @@ export const EncMediaAssertions = {
   },
 
 
+   invalid_mediaURL_error: {
+    scope: "page",
+    fn: async ({ EncMediapage }) => {
+      await expect(EncMediapage.CreatePopMediaURL_invalid_Error).toBeVisible();
+    },
+  },
+
+
+
+
 
 
 

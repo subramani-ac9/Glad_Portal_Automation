@@ -150,6 +150,7 @@ test.describe("Enc Media", () => {
         const result = await encMediaPage.updateEncMedia(data);
         await validateResult(expectedValues, { encMediaPage });
 
+        await page.waitForTimeout(5000);
         if (result.status === "UPDATED" && !errorExpected) {
           // 🔹 Decide which title to search
           const finalTitle = resolveFinal(
@@ -157,7 +158,7 @@ test.describe("Enc Media", () => {
             result.OldData.title
           );
 
-          // 🔹 Open edit modal using FINAL title
+          // 🔹Open edit modal using FINAL title
           await encMediaPage.openEditModalByTitle(finalTitle);
 
           const actual = await encMediaPage.readEncMediaForm();
@@ -165,7 +166,7 @@ test.describe("Enc Media", () => {
 
           const finalMediaType = resolveFinal(
             data.updatedMediaType,
-             result.OldData.mediaType
+            result.OldData.mediaType
           );
 
           const finalDecryptionAlgo = resolveFinal(
@@ -212,8 +213,8 @@ test.describe("Enc Media", () => {
               data.updatedControllerOption,
               result.OldData.controllerOption);
           }
-          if ( finalDecryptionAlgo === "aesGcm" || finalDecryptionAlgo === "aesHls128") {
-            expected.nonce = resolveFinal(data.updatedNonce,result.OldData.nonce);
+          if (finalDecryptionAlgo === "aesGcm" || finalDecryptionAlgo === "aesHls128") {
+            expected.nonce = resolveFinal(data.updatedNonce, result.OldData.nonce);
           }
 
           for (const key of Object.keys(expected)) {
@@ -238,6 +239,27 @@ test.describe("Enc Media", () => {
         expect(row).toBeNull();
       }
 
+      if (data.action === "view") {
+        const result = await encMediaPage.viewByTitle(data.title,data.mediaType);
+        await validateResult(expectedValues, { encMediaPage });
+        await page.waitForTimeout(3000);
+        await expect(data.title).toBe(result.title);
+        await expect(data.language).toBe(result.language);
+
+        const expectedProducts = data.productNames
+          .split(",")
+          .map(p => p.trim())
+          .sort();
+
+        const actualProducts = result.productNames
+          .map(p => p.trim())
+          .sort();
+
+        // console.log('Expected:', expectedProducts);
+        // console.log('Actual:', actualProducts);
+
+        await expect(actualProducts).toEqual(expectedProducts);
+      }
     }
     );
   });

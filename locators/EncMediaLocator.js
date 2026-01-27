@@ -46,19 +46,25 @@ export const EncMediaLocators = {
   //this only appears when we switch to document and come back to video/audio file format
   CreatePopDecryptionAlgorithmRequiredError:
     "Decryption algorithm is required for audio and video",
-    
+
   CreatePopNonceRequiredError: "Nonce is required",
-  
-  
- 
+
+
   CreatePopThumbnailURL_invalid_Error: "Please enter a valid thumbnail URL",
   CreatePopThumbnailURL_Maximum_Error:
     "Thumbnail URL must be at most 255 characters",
-  
 
   create_edit_delete_success_msg: ".mantine-Notification-body",
 
   cancel_btnX:
     "//button[@aria-label='Close modal']//*[name()='svg']",
 
+  viewIcon : "View icon",
+  viewMediaProducts: 'xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[3]/div[2]/div',
+  viewMediaFileTypeIcon: ".lucide.lucide-file-text[xmlns='http://www.w3.org/2000/svg'][width='20']",
+  viewMediaVideoTypeIcon: ".lucide.lucide-video[xmlns='http://www.w3.org/2000/svg'][width='20']",
+  viewMediaAudioTypeIcon: ".lucide.lucide-music[xmlns='http://www.w3.org/2000/svg'][width='20']",
+  viewMediaLanguage :'xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[5]',
+  viewMediaEditButton : "Edit",
+  viewMediaTitle : "xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[2]/div"
 };

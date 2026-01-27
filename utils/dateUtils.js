@@ -64,25 +64,79 @@ export async function handleInput(locator, value) {
   return true; // updated
 }
 
+// export async function handleMantineSelect(locator, value, page) {
+//   if (value === null || value === undefined || value === "null") {
+//     return false;
+//   }
+
+//   const values = Array.isArray(value)
+//     ? value.map(v => v.toString().trim())
+//     : value.toString().split(",").map(v => v.trim());
+
+//   const isMultiSelect = await locator.evaluate(input =>
+//     input.closest(".mantine-MultiSelect-values") !== null
+//   );
+
+//   let existingValues = [];
+
+//   if (isMultiSelect) {
+//     existingValues = await locator.evaluate(input => {
+//       const wrapper = input.closest(".mantine-MultiSelect-values");
+//       const chips = wrapper.querySelectorAll('[data-value]');
+//       return Array.from(chips).map(c => c.textContent.trim());
+//     });
+//   } else {
+//     const currentValue = (await locator.inputValue()).trim();
+//     if (currentValue) existingValues = [currentValue];
+//   }
+
+//   let updated = false;
+
+//   for (const val of values) {
+//     if (existingValues.includes(val)) continue;
+
+//     // 🔁 Re-open dropdown every time
+//     await locator.click();
+
+//     const option = page.getByRole("option", { name: val });
+
+//     // ⏳ Wait until option is visible
+//     await option.waitFor({ state: "visible" });
+
+//     await option.click();
+//     updated = true;
+
+//     // Small stabilization wait (important for Mantine)
+//     await page.waitForTimeout(200);
+//   }
+
+//   return updated;
+// }
+
 export async function handleMantineSelect(locator, value, page) {
   if (value === null || value === undefined || value === "null") {
     return false;
   }
 
-  const values = Array.isArray(value)
-    ? value.map(v => v.toString().trim())
-    : value.toString().split(",").map(v => v.trim());
+  const values = (Array.isArray(value)
+    ? value
+    : value.toString().split(",")
+  )
+    .map(v => v.toString().trim())
+    .filter(v => v.length > 0); // 🔥 critical fix
+
+  if (values.length === 0) return false;
 
   const isMultiSelect = await locator.evaluate(input =>
-    input.closest(".mantine-MultiSelect-values") !== null
+    input.closest(".mantine-MultiSelect-wrapper") !== null
   );
 
   let existingValues = [];
 
   if (isMultiSelect) {
     existingValues = await locator.evaluate(input => {
-      const wrapper = input.closest(".mantine-MultiSelect-values");
-      const chips = wrapper.querySelectorAll('[data-value]');
+      const wrapper = input.closest(".mantine-MultiSelect-wrapper");
+      const chips = wrapper?.querySelectorAll(".mantine-MultiSelect-value") || [];
       return Array.from(chips).map(c => c.textContent.trim());
     });
   } else {
@@ -95,19 +149,21 @@ export async function handleMantineSelect(locator, value, page) {
   for (const val of values) {
     if (existingValues.includes(val)) continue;
 
-    // 🔁 Re-open dropdown every time
-    await locator.click();
+    // Open dropdown
+    await locator.scrollIntoViewIfNeeded();
+    await locator.click({ force: true });
 
-    const option = page.getByRole("option", { name: val });
+    // 🔎 Global search (Mantine portal)
+    const option = page.locator('[role="option"]', {
+      hasText: val
+    }).first();
 
-    // ⏳ Wait until option is visible
-    await option.waitFor({ state: "visible" });
+    await option.waitFor({ state: "visible", timeout: 10000 });
+    await option.scrollIntoViewIfNeeded();
+    await option.click({ force: true });
 
-    await option.click();
     updated = true;
-
-    // Small stabilization wait (important for Mantine)
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(200); // Mantine stabilization
   }
 
   return updated;

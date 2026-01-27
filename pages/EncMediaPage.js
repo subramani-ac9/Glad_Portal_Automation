@@ -68,6 +68,17 @@ export class EncMediapage {
 
     this.create_edit_delete_success_msg = page.locator(EncMediaLocators.create_edit_delete_success_msg).filter({ hasText: 'Success' }).last();
 
+
+    //view media
+
+    this.viewMediaEditButton = page.getByRole('button', { name: EncMediaLocators.viewMediaEditButton });
+    this.viewIcon = page.getByAltText(EncMediaLocators.viewIcon);
+    this.viewMediaProducts = page.locator(EncMediaLocators.viewMediaProducts);
+    this.viewMediaFileTypeIcon = page.locator(EncMediaLocators.viewMediaFileTypeIcon)
+    this.viewMediaVideoTypeIcon = page.locator(EncMediaLocators.viewMediaVideoTypeIcon)
+    this.viewMediaAudioTypeIcon = page.locator(EncMediaLocators.viewMediaAudioTypeIcon)
+    this.viewMediaLanguage = page.locator(EncMediaLocators.viewMediaLanguage)
+    this.viewMediaTitle = page.locator(EncMediaLocators.viewMediaTitle);
   }
 
 
@@ -399,7 +410,7 @@ export class EncMediapage {
       if (await nextBtn.isDisabled()) break;
 
       await nextBtn.click();
-      await this.page.waitForLoadState("networkidle");
+      await this.page.waitForTimeout(5000);
     }
 
     return null;
@@ -559,6 +570,44 @@ export class EncMediapage {
       .filter({ hasText: "Yes,delete" })
       .last()
       .click();
+
+  }
+
+
+  /* ----------------------------------------------------
+   VIEW
+---------------------------------------------------- */
+
+  async viewByTitle(title, mediaType) {
+    const row = await this.findRowByTitle(title);
+    expect(row).not.toBeNull();
+
+    await row.getByAltText("View icon").click();
+
+    console.log("view icon clicked");
+
+    const count = await this.viewMediaProducts.count();
+    const productNames = [];
+
+    for (let i = 0; i < count; i++) {
+      const name = await this.viewMediaProducts.nth(i).innerText();
+      productNames.push(name.trim());
+    }
+
+    const language = await this.viewMediaLanguage.innerText();
+    const tit = await this.viewMediaTitle.innerText();
+
+    await expect(this.viewMediaEditButton).toBeEnabled();
+
+    if (mediaType === "Video") {
+      await expect(this.viewMediaVideoTypeIcon).toBeVisible();
+    } else if (mediaType === "Audio") {
+      await expect(this.viewMediaAudioTypeIcon).toBeVisible();
+    } else {
+      await expect(this.viewMediaFileTypeIcon).toBeVisible();
+    }
+
+    return { title: tit, language, productNames };
 
   }
 
