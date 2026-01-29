@@ -3,9 +3,8 @@ import { LoginPage } from "../pages/LoginPage";
 import { readSheet } from "../utils/sheetReader";
 import { ENC_MEDIA_SHEET_URL } from "../utils/config";
 import { EncMediapage } from "../pages/EncMediaPage";
-import { isErrorExpected } from "../utils/dateUtils";
+import { isErrorExpected, openPopup, refreshList } from "../utils/dateUtils";
 import { validateResult } from "../utils/validateResult";
-
 
 // let page;
 let testData = await readSheet(ENC_MEDIA_SHEET_URL);
@@ -240,7 +239,7 @@ test.describe("Enc Media", () => {
       }
 
       if (data.action === "view") {
-        const result = await encMediaPage.viewByTitle(data.title,data.mediaType);
+        const result = await encMediaPage.viewByTitle(data.title, data.mediaType);
         await validateResult(expectedValues, { encMediaPage });
         await page.waitForTimeout(3000);
         await expect(data.title).toBe(result.title);
@@ -264,4 +263,83 @@ test.describe("Enc Media", () => {
     );
   });
 
+
+  test('testing refresh button', async ({ page }) => {
+
+    const encMediaPage = new EncMediapage(page);
+    await refreshList(
+      encMediaPage.refreshBtn,
+      encMediaPage.toasts,
+    );
+  });
+
+  test('testing logout', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.logout();
+  });
+
+  test('testing close icon in creating', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await encMediaPage.cancelBtnX.click();
+    await expect(encMediaPage.CreatePopupTitle).not.toBeVisible();
+  })
+
+   test('testing media type and their respective checkboxes', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await encMediaPage.cancelBtnX.click();
+    await expect(encMediaPage.CreatePopupTitle).not.toBeVisible();
+  })
+
+
+  test.only('testing close icon in updating', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+
+    // const updateData = testData.filter((el)=>el.action === "update");
+    const editIcon = await page.locator("xpath=/html[1]/body[1]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[6]/div[1]/button[2]/img[1]");
+    await editIcon.click();
+    await encMediaPage.cancelBtnX.click();
+    await expect(encMediaPage.UpdatePopupTitle).not.toBeVisible();
+  })
+
+
+
 });
+
+test('glad user login(IN)', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const encMediaPage = new EncMediapage(page);
+
+
+  await loginPage.goto("login");
+  await loginPage.login(
+    "test-glad-user-in@abovecloud9.ai",
+    "Abovecloud@ac9"
+  );
+  await page.waitForTimeout(5000);
+
+  await expect(encMediaPage.encMediaIcon).not.toBeVisible();
+})
+
+
+test('glad user login(US)', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const encMediaPage = new EncMediapage(page);
+
+
+  await loginPage.goto("login");
+  await loginPage.login(
+    "test-glad-user@abovecloud9.ai",
+    "Abovecloud@ac9"
+  );
+  await page.waitForTimeout(5000);
+
+  await expect(encMediaPage.encMediaIcon).not.toBeVisible();
+})
+
+
+
+

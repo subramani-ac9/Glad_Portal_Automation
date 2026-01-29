@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { EncMediaLocators } from "../locators/EncMediaLocator";
-import { handleInput, handleMantineSelect, openPopup } from "../utils/dateUtils";
+import { handleInput, handleMantineSelect, handleMutliSelect, openPopup } from "../utils/dateUtils";
 import { LoginPage } from "./LoginPage";
 
 export class EncMediapage {
@@ -10,6 +10,9 @@ export class EncMediapage {
     this.aolIcon = page.locator(EncMediaLocators.aolIcon);
     this.title = page.getByText(EncMediaLocators.title);
     this.encMediaIcon = page.getByAltText('Encrypted Media');
+    this.logoutBtn = page.getByText(EncMediaLocators.logoutBtn);
+    this.userIcon = page.locator(EncMediaLocators.userIcon);
+
 
     //buttons
     this.createNewBtn = page.getByText(EncMediaLocators.createNewBtn);
@@ -62,11 +65,10 @@ export class EncMediapage {
 
     this.CreatePopNonceRequiredError = page.getByText(EncMediaLocators.CreatePopNonceRequiredError)
 
-
     this.CreatePopThumbnailURL_invalid_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_invalid_Error);
     this.CreatePopThumbnailURL_Maximum_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_Maximum_Error);
 
-    this.create_edit_delete_success_msg = page.locator(EncMediaLocators.create_edit_delete_success_msg).filter({ hasText: 'Success' }).last();
+    this.toasts = page.locator(EncMediaLocators.toasts);;
 
 
     //view media
@@ -503,7 +505,7 @@ export class EncMediapage {
       }
     }
 
-    await handleMantineSelect(this.CreatePopProductNameInput, data.productNames, this.page);
+    await handleMutliSelect(this.CreatePopProductNameInput, data.productNames, this.page);
 
 
     const title = await this.CreatePopTitleInput.inputValue();
@@ -544,7 +546,7 @@ export class EncMediapage {
       }
     }
 
-    await handleMantineSelect(this.CreatePopProductNameInput, data.updatedProductNames, this.page);
+    await handleMutliSelect(this.CreatePopProductNameInput, data.updatedProductNames, this.page);
 
     if (await this.updateBtn.isDisabled()) {
       await this.closeModal();
@@ -554,7 +556,6 @@ export class EncMediapage {
     await this.updateBtn.click();
     return { status: "UPDATED", OldData };
   }
-
 
   /* ----------------------------------------------------
     DELETE

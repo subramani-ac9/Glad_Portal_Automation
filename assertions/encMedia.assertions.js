@@ -16,12 +16,33 @@ export const EncMediaAssertions = {
     },
   },
 
+  // ------------------ toast ---------------
+
   create_edit_delete_successMsg: {
     scope: "page",
     fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.create_edit_delete_success_msg).toBeVisible();
+      await expect(EncMediapage.toasts).toContainText("Success");
     },
   },
+  title_already_existing_error :{
+     scope: "page",
+    fn: async ({ EncMediapage }) => {
+      await expect(EncMediapage.toasts).toContainText("Error");
+      await expect(EncMediapage.toasts).toContainText("Encrypted media already exists");
+    },
+  },
+
+  media_notFound_error :{
+    scope: "page",
+    fn: async ({ EncMediapage }) => {
+      await expect(EncMediapage.toasts).toContainText("Error");
+      await expect(EncMediapage.toasts).toContainText("Encrypted media file not found in S3 storage");
+    },
+
+  },
+
+
+  ////////////////////
 
   title_required_error: {
     scope: "page",

@@ -1,6 +1,8 @@
 export const EncMediaLocators = {
   aolIcon: "xpath=/html[1]/body[1]/div[1]/div[2]/button[2]/img[1]",
   title: "Encrypted Media Management",
+  logoutBtn :"Logout",
+  userIcon : "xpath=/html[1]/body[1]/div[1]/div[2]/div[1]/div[1]/div[1]/button[1]/div[1]/span[1]/div[1]/img[1]",
   createNewBtn: "Create New",
   refreshBtn: ".lucide.lucide-refresh-ccw",
   CreatePopupTitle: "Create New Media",
@@ -54,7 +56,7 @@ export const EncMediaLocators = {
   CreatePopThumbnailURL_Maximum_Error:
     "Thumbnail URL must be at most 255 characters",
 
-  create_edit_delete_success_msg: ".mantine-Notification-body",
+  toasts: ".mantine-Notification-body",
 
   cancel_btnX:
     "//button[@aria-label='Close modal']//*[name()='svg']",

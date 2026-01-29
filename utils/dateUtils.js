@@ -48,7 +48,7 @@ export async function handleInput(locator, value) {
     return false;
   } // skip
 
-    console.log("loc",locator)
+  console.log("loc", locator)
 
   if (value === "") {
     await locator.clear();
@@ -118,67 +118,126 @@ export async function handleMantineSelect(locator, value, page) {
     return false;
   }
 
-  const values = (Array.isArray(value)
-    ? value
-    : value.toString().split(",")
-  )
-    .map(v => v.toString().trim())
-    .filter(v => v.length > 0); // 🔥 critical fix
+  const val = value.toString().trim();
 
-  if (values.length === 0) return false;
+  // Read current value
+  const currentValue = (await locator.inputValue()).trim();
 
-  const isMultiSelect = await locator.evaluate(input =>
-    input.closest(".mantine-MultiSelect-wrapper") !== null
-  );
-
-  let existingValues = [];
-
-  if (isMultiSelect) {
-    existingValues = await locator.evaluate(input => {
-      const wrapper = input.closest(".mantine-MultiSelect-wrapper");
-      const chips = wrapper?.querySelectorAll(".mantine-MultiSelect-value") || [];
-      return Array.from(chips).map(c => c.textContent.trim());
-    });
-  } else {
-    const currentValue = (await locator.inputValue()).trim();
-    if (currentValue) existingValues = [currentValue];
+  // Skip if already selected
+  if (currentValue === val) {
+    return false;
   }
 
-  let updated = false;
+  // Open dropdown
+  await locator.click();
 
-  for (const val of values) {
-    if (existingValues.includes(val)) continue;
+  const option = page.getByRole("option", { name: val });
 
-    // Open dropdown
-    await locator.scrollIntoViewIfNeeded();
-    await locator.click({ force: true });
+  // Wait until option is visible
+  await option.waitFor({ state: "visible" });
 
-    // 🔎 Global search (Mantine portal)
-    const option = page.locator('[role="option"]', {
-      hasText: val
-    }).first();
+  // Select option
+  await option.click();
 
-    await option.waitFor({ state: "visible", timeout: 10000 });
-    await option.scrollIntoViewIfNeeded();
-    await option.click({ force: true });
+  // Small stabilization wait (important for Mantine)
+  await page.waitForTimeout(200);
 
-    updated = true;
-    await page.waitForTimeout(200); // Mantine stabilization
-  }
-
-  return updated;
+  return true;
 }
 
+export async function handleMutliSelect(locator, value, page) {
+
+  if (value === null || value === undefined || value === "null") {
+    return false;
+  }
+
+  const desiredValues = Array.isArray(value)
+  ? value.map(v => v.toString().trim()).filter(v => v.length > 0)
+  : value
+      .toString()
+      .split(",")
+      .map(v => v.trim())
+      .filter(v => v.length > 0);
+
+
+  // 1️⃣ Read currently selected values (chips)
+  const selectedValues = await page
+    .locator('.mantine-MultiSelect-value')
+    .allTextContents();
+
+  const normalizedSelected = selectedValues.map(v => v.trim());
+
+  console.log("selected values:", normalizedSelected);
+  console.log("desired values:", desiredValues);
+
+  // 🔥 SPECIAL CASE: clear all when desired is empty
+  if (desiredValues.length === 0) {
+    if (normalizedSelected.length === 0) {
+      return false; // already empty
+    }
+
+    // Remove every chip
+    for (const value of normalizedSelected) {
+      const chip = page.locator('.mantine-MultiSelect-value', { hasText: value });
+      if (await chip.count()) {
+        await chip.locator('button').click();
+      }
+    }
+
+    await page.waitForTimeout(200);
+    return true;
+  }
+
+  // 2️⃣ VALUES TO REMOVE (selected but not desired)
+  const valuesToRemove = normalizedSelected.filter(
+    value => !desiredValues.includes(value)
+  );
+
+  // 3️⃣ VALUES TO ADD (desired but not selected)
+  const valuesToAdd = desiredValues.filter(
+    value => !normalizedSelected.includes(value)
+  );
+
+  if (valuesToRemove.length === 0 && valuesToAdd.length === 0) {
+    return false;
+  }
+
+  // 4️⃣ Remove unwanted values
+  for (const value of valuesToRemove) {
+    const chip = page.locator('.mantine-MultiSelect-value', { hasText: value });
+    if (await chip.count()) {
+      await chip.locator('button').click();
+    }
+  }
+
+  // 5️⃣ Add missing
+  if (valuesToAdd.length > 0) {
+    await locator.click();
+  }
+
+  // 5️⃣ Add missing values
+  for (const value of valuesToAdd) {
+
+    const listbox = page.locator('div[role="listbox"]');
+    await expect(listbox).toBeVisible();
+
+    await listbox
+      .locator('div[role="option"]', { hasText: value })
+      .click();
+  }
+
+  await page.waitForTimeout(200);
+  return true;
+}
 
 export async function openPopup(triggerBtn, popupTitle) {
   await triggerBtn.click();
   await popupTitle.waitFor({ state: "visible" });
 }
 
-export async function refreshList(refreshBtn, createEditDeleteSuccessMsg) {
+export async function refreshList(refreshBtn, toasts) {
   await refreshBtn.click();
-  expect(createEditDeleteSuccessMsg).toBeVisible();
-
+  await expect(toasts).toContainText("Success");
 }
 
 
