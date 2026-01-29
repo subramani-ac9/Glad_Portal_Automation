@@ -3,7 +3,7 @@ import { LoginPage } from "../pages/LoginPage";
 import { readSheet } from "../utils/sheetReader";
 import { ENC_MEDIA_SHEET_URL } from "../utils/config";
 import { EncMediapage } from "../pages/EncMediaPage";
-import { isErrorExpected, openPopup, refreshList } from "../utils/dateUtils";
+import { handleMantineSelect, isErrorExpected, openPopup, refreshList } from "../utils/dateUtils";
 import { validateResult } from "../utils/validateResult";
 
 // let page;
@@ -229,13 +229,23 @@ test.describe("Enc Media", () => {
       }
 
       if (data.action === "delete") {
-        await encMediaPage.deleteByTitle(data.title);
+        const titles = data.title.includes(",")
+          ? data.title.split(",").map((t) => t.trim())
+          : [data.title];
+        console.log("Deleting titles:", titles);
+        if (titles.length === 1) {
+          //  single delete
+          await encMediaPage.deleteByTitle(titles[0]);
+        } else {
+          //  multiple delete
+          await encMediaPage.deleteMultipleByTitles(titles);
+        }
         await validateResult(expectedValues, { encMediaPage });
 
-        await page.waitForTimeout(3000);
-
-        const row = await encMediaPage.findRowByTitle(data.title);
-        expect(row).toBeNull();
+        // Verify all rows
+        for (const title of titles) {
+          await encMediaPage.waitForRowToBeDeleted(title.trim());
+        }
       }
 
       if (data.action === "view") {
@@ -286,16 +296,65 @@ test.describe("Enc Media", () => {
     await expect(encMediaPage.CreatePopupTitle).not.toBeVisible();
   })
 
-   test('testing media type and their respective checkboxes', async ({ page }) => {
+  test('testing media type(audio) and their respective checkboxes visibility', async ({ page }) => {
     const encMediaPage = new EncMediapage(page);
-
     await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
-    await encMediaPage.cancelBtnX.click();
-    await expect(encMediaPage.CreatePopupTitle).not.toBeVisible();
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Audio", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).toBeVisible();
+
+  })
+
+  test('testing  media type(video) and their respective checkboxes visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Video", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).toBeVisible();
+  })
+
+  test('testing media types(document) and their respective checkboxes visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Document", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDecryptionAlgorithmDropdown).not.toBeVisible();
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+
+  })
+
+  test('testing decryption algorithms(aesGcm) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "aesGcm", page);
+    await expect(encMediaPage.CreatePopNonceInput).toBeVisible();
+  })
+
+  test('testing decryption algorithms(both) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "Both", page);
+    await expect(encMediaPage.CreatePopNonceInput).toBeVisible();
   })
 
 
-  test.only('testing close icon in updating', async ({ page }) => {
+  test('testing decryption algorithms(aesHls128) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "aesHls128", page);
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+  })
+
+  test('testing decryption algorithms(none) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "None", page);
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+  })
+
+
+  test('testing close icon in updating', async ({ page }) => {
     const encMediaPage = new EncMediapage(page);
 
     // const updateData = testData.filter((el)=>el.action === "update");
@@ -304,8 +363,6 @@ test.describe("Enc Media", () => {
     await encMediaPage.cancelBtnX.click();
     await expect(encMediaPage.UpdatePopupTitle).not.toBeVisible();
   })
-
-
 
 });
 

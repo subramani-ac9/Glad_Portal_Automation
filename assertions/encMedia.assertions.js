@@ -24,15 +24,15 @@ export const EncMediaAssertions = {
       await expect(EncMediapage.toasts).toContainText("Success");
     },
   },
-  title_already_existing_error :{
-     scope: "page",
+  title_already_existing_error: {
+    scope: "page",
     fn: async ({ EncMediapage }) => {
       await expect(EncMediapage.toasts).toContainText("Error");
       await expect(EncMediapage.toasts).toContainText("Encrypted media already exists");
     },
   },
 
-  media_notFound_error :{
+  media_notFound_error: {
     scope: "page",
     fn: async ({ EncMediapage }) => {
       await expect(EncMediapage.toasts).toContainText("Error");
@@ -141,7 +141,7 @@ export const EncMediaAssertions = {
   },
 
 
-   invalid_mediaURL_error: {
+  invalid_mediaURL_error: {
     scope: "page",
     fn: async ({ EncMediapage }) => {
       await expect(EncMediapage.CreatePopMediaURL_invalid_Error).toBeVisible();
@@ -150,11 +150,12 @@ export const EncMediaAssertions = {
 
 
 
-
-
-
-
-
+  multipleDeleteSuccessMsg: {
+    scope: "page",
+    fn: async ({ EncMediapage }) => {
+      await expect(EncMediapage.toasts).toContainText("Selected resources deleted successfully");
+    }
+  }
 
 
 };

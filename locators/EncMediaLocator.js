@@ -68,5 +68,10 @@ export const EncMediaLocators = {
   viewMediaAudioTypeIcon: ".lucide.lucide-music[xmlns='http://www.w3.org/2000/svg'][width='20']",
   viewMediaLanguage :'xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[5]',
   viewMediaEditButton : "Edit",
-  viewMediaTitle : "xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[2]/div"
+  viewMediaTitle : "xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[2]/div",
+
+
+  multipleDeleteEncMedia:
+  "Delete Selected",
+  multipleDeleteSuccessMsg: "Selected resources deleted successfully",
 };
