@@ -14,7 +14,7 @@ export const productLocators = {
   CreatePopMaximumCapacityInput: "Count in Person",
   CreatePopProductTypeDropdown: "Product Type",
   CreatePopThumbnailURLInput: "input[name='thumbnailURL']",
-  CreatePopGladProductTypeDropdown: "Select glad product",
+  CreatePopGladProductTypeDropdown: "Glad Product",
 
   //min max
   CreatePopUpEventdaysMaximumInput: "input[name='productConfig.duration.eventInDays.max']",
@@ -50,6 +50,6 @@ export const productLocators = {
   CreatePopUpMaximumCapacityMinError :"Capacity cannot be less than 0",
 
   toasts: ".mantine-Notification-body",
-  cancel_btnX: "//button[@aria-label='Close modal']//*[name()='svg']",
+  cancel_btnX: "//button[@class='mantine-UnstyledButton-root mantine-ActionIcon-root mantine-CloseButton-root mantine-Modal-close mantine-10zglki']//*[name()='svg']",
 
 };

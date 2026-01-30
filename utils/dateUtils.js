@@ -119,6 +119,7 @@ export async function handleMantineSelect(locator, value, page) {
   }
 
   const val = value.toString().trim();
+  console.log(locator,val);
 
   // Read current value
   const currentValue = (await locator.inputValue()).trim();
@@ -135,9 +136,11 @@ export async function handleMantineSelect(locator, value, page) {
 
   // Wait until option is visible
   await option.waitFor({ state: "visible" });
+  console.log("option located");
 
   // Select option
   await option.click();
+  console.log("option clicked");
 
   // Small stabilization wait (important for Mantine)
   await page.waitForTimeout(200);

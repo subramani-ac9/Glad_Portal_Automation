@@ -1,6 +1,11 @@
 import { expect } from "@playwright/test";
 import { EncMediaLocators } from "../locators/EncMediaLocator";
-import { handleInput, handleMantineSelect, handleMutliSelect, openPopup } from "../utils/dateUtils";
+import {
+  handleInput,
+  handleMantineSelect,
+  handleMutliSelect,
+  openPopup,
+} from "../utils/dateUtils";
 import { LoginPage } from "./LoginPage";
 import { allure } from "allure-playwright";
 export class EncMediapage {
@@ -9,93 +14,163 @@ export class EncMediapage {
 
     this.aolIcon = page.locator(EncMediaLocators.aolIcon);
     this.title = page.getByText(EncMediaLocators.title);
-    this.encMediaIcon = page.getByAltText('Encrypted Media');
+    this.encMediaIcon = page.getByAltText("Encrypted Media");
     this.logoutBtn = page.getByText(EncMediaLocators.logoutBtn);
     this.userIcon = page.locator(EncMediaLocators.userIcon);
-
 
     //buttons
     this.createNewBtn = page.getByText(EncMediaLocators.createNewBtn);
     this.refreshBtn = page.locator(EncMediaLocators.refreshBtn);
     this.CreatePopupTitle = page.getByText(EncMediaLocators.CreatePopupTitle);
     this.UpdatePopupTitle = page.locator(EncMediaLocators.UpdatePopupTitle);
-    this.CreatePopTitleInput = page.locator(EncMediaLocators.CreatePopTitleInput);
-    this.CreatePopMediaTypeDropdown = page.getByPlaceholder(EncMediaLocators.CreatePopMediaTypeDropdown);
-    this.CreatePopMediaSizeInput = page.getByPlaceholder(EncMediaLocators.CreatePopMediaSizeInput)
+    this.CreatePopTitleInput = page.locator(
+      EncMediaLocators.CreatePopTitleInput,
+    );
+    this.CreatePopMediaTypeDropdown = page.getByPlaceholder(
+      EncMediaLocators.CreatePopMediaTypeDropdown,
+    );
+    this.CreatePopMediaSizeInput = page.getByPlaceholder(
+      EncMediaLocators.CreatePopMediaSizeInput,
+    );
 
-    this.CreatePopEnableBackgroundCheckbox = page.getByLabel(EncMediaLocators.CreatePopEnableBackgroundCheckbox, { exact: true })
-    this.CreatePopDisableControllerCheckbox = page.getByLabel(EncMediaLocators.CreatePopDisableControllerCheckbox, { exact: true })
+    this.CreatePopEnableBackgroundCheckbox = page.getByLabel(
+      EncMediaLocators.CreatePopEnableBackgroundCheckbox,
+      { exact: true },
+    );
+    this.CreatePopDisableControllerCheckbox = page.getByLabel(
+      EncMediaLocators.CreatePopDisableControllerCheckbox,
+      { exact: true },
+    );
 
-    this.CreatePopLanguageInput = page.locator(EncMediaLocators.CreatePopLanguageInput);
-    this.CreatePopMediaURLInput = page.locator(EncMediaLocators.CreatePopMediaURLInput)
-    this.CreatePopDecryptionAlgorithmDropdown = page.getByLabel(EncMediaLocators.CreatePopDecryptionAlgorithmDropdown)
-    this.CreatePopThumbnailURLInput = page.locator(EncMediaLocators.CreatePopThumbnailURLInput)
-    this.CreatePopDurationInput = page.locator(EncMediaLocators.CreatePopDurationInput)
-    this.CreatePopProductNameInput = page.getByLabel(EncMediaLocators.CreatePopProductNameInput, { exact: true });
-    this.CreatePopNonceInput = page.getByPlaceholder(EncMediaLocators.CreatePopNonceInput)
+    this.CreatePopLanguageInput = page.locator(
+      EncMediaLocators.CreatePopLanguageInput,
+    );
+    this.CreatePopMediaURLInput = page.locator(
+      EncMediaLocators.CreatePopMediaURLInput,
+    );
+    this.CreatePopDecryptionAlgorithmDropdown = page.getByLabel(
+      EncMediaLocators.CreatePopDecryptionAlgorithmDropdown,
+    );
+    this.CreatePopThumbnailURLInput = page.locator(
+      EncMediaLocators.CreatePopThumbnailURLInput,
+    );
+    this.CreatePopDurationInput = page.locator(
+      EncMediaLocators.CreatePopDurationInput,
+    );
+    this.CreatePopProductNameInput = page.getByLabel(
+      EncMediaLocators.CreatePopProductNameInput,
+      { exact: true },
+    );
+    this.CreatePopNonceInput = page.getByPlaceholder(
+      EncMediaLocators.CreatePopNonceInput,
+    );
 
-    this.CreatePopCreateBtn = page.getByText(EncMediaLocators.CreatePopCreateBtn)
+    this.CreatePopCreateBtn = page.getByText(
+      EncMediaLocators.CreatePopCreateBtn,
+    );
     this.CreatePopCancelBtn = page.locator(EncMediaLocators.CreatePopCancelBtn);
 
-    this.updateBtn = page.getByRole('button', { name: 'Update Media' });
+    this.updateBtn = page.getByRole("button", { name: "Update Media" });
     this.cancelBtnX = page.locator(EncMediaLocators.cancel_btnX);
     this.deletecancelBtn = page
       .locator("button")
       .filter({ hasText: "Cancel" })
       .first();
 
-    this.CreatePopTitle_RequiredError = page.getByText(EncMediaLocators.CreatePopTitleRequiredError)
-    this.CreatePopTitleInput_Maximum_Error = page.getByText(EncMediaLocators.CreatePopTitleInput_Maximum_Error);
+    this.CreatePopTitle_RequiredError = page.getByText(
+      EncMediaLocators.CreatePopTitleRequiredError,
+    );
+    this.CreatePopTitleInput_Maximum_Error = page.getByText(
+      EncMediaLocators.CreatePopTitleInput_Maximum_Error,
+    );
 
-    this.CreatePopMediaSize_RequiredError = page.getByText(EncMediaLocators.CreatePopMediaSizeRequiredError)
-    this.CreatePopMediaSize_Minimum_Error = page.getByText(EncMediaLocators.CreatePopMediaSize_Minimum_Error)
-    this.CreatePopMediaSize_Maximum_Error = page.getByText(EncMediaLocators.CreatePopMediaSize_Maximum_Error)
+    this.CreatePopMediaSize_RequiredError = page.getByText(
+      EncMediaLocators.CreatePopMediaSizeRequiredError,
+    );
+    this.CreatePopMediaSize_Minimum_Error = page.getByText(
+      EncMediaLocators.CreatePopMediaSize_Minimum_Error,
+    );
+    this.CreatePopMediaSize_Maximum_Error = page.getByText(
+      EncMediaLocators.CreatePopMediaSize_Maximum_Error,
+    );
 
-    this.CreatePopMediaURLRequiredError = page.getByText(EncMediaLocators.CreatePopMediaURLRequiredError)
-    this.CreatePopMediaURL_invalid_Error = page.getByText(EncMediaLocators.CreatePopMediaURL_invalid_Error);
-    this.CreatePopMediaURL_Maximum_Error = page.getByText(EncMediaLocators.CreatePopMediaURL_Maximum_Error);
+    this.CreatePopMediaURLRequiredError = page.getByText(
+      EncMediaLocators.CreatePopMediaURLRequiredError,
+    );
+    this.CreatePopMediaURL_invalid_Error = page.getByText(
+      EncMediaLocators.CreatePopMediaURL_invalid_Error,
+    );
+    this.CreatePopMediaURL_Maximum_Error = page.getByText(
+      EncMediaLocators.CreatePopMediaURL_Maximum_Error,
+    );
 
+    this.CreatePopDurationRequiredError = page.getByText(
+      EncMediaLocators.CreatePopDurationRequiredError,
+    );
+    this.CreatePopDuration_Maximum_Error = page.getByText(
+      EncMediaLocators.CreatePopDuration_Maximum_Error,
+    );
 
-    this.CreatePopDurationRequiredError = page.getByText(EncMediaLocators.CreatePopDurationRequiredError)
-    this.CreatePopDuration_Maximum_Error = page.getByText(EncMediaLocators.CreatePopDuration_Maximum_Error);
+    this.CreatePopProductNameRequiredError = page.getByText(
+      EncMediaLocators.CreatePopProductNameRequiredError,
+    );
 
-    this.CreatePopProductNameRequiredError = page.getByText(EncMediaLocators.CreatePopProductNameRequiredError)
+    this.CreatePopDecryptionAlgorithmRequiredError = page.getByText(
+      EncMediaLocators.CreatePopDecryptionAlgorithmRequiredError,
+    );
 
-    this.CreatePopDecryptionAlgorithmRequiredError = page.getByText(EncMediaLocators.CreatePopDecryptionAlgorithmRequiredError)
+    this.CreatePopNonceRequiredError = page.getByText(
+      EncMediaLocators.CreatePopNonceRequiredError,
+    );
 
-    this.CreatePopNonceRequiredError = page.getByText(EncMediaLocators.CreatePopNonceRequiredError)
-
-    this.CreatePopThumbnailURL_invalid_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_invalid_Error);
-    this.CreatePopThumbnailURL_Maximum_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_Maximum_Error);
+    this.CreatePopThumbnailURL_invalid_Error = page.getByText(
+      EncMediaLocators.CreatePopThumbnailURL_invalid_Error,
+    );
+    this.CreatePopThumbnailURL_Maximum_Error = page.getByText(
+      EncMediaLocators.CreatePopThumbnailURL_Maximum_Error,
+    );
 
     this.toasts = page.locator(EncMediaLocators.toasts);
 
-     //serach input
+    //serach input
     this.searchInputEncMedia = page.locator(
       EncMediaLocators.searchInputEncMedia,
     );
-    this.noResourcesEncMedia = page.getByText(EncMediaLocators.noResourcesEncMedia).nth(1);
+    this.noResourcesEncMedia = page
+      .getByText(EncMediaLocators.noResourcesEncMedia)
+      .nth(1);
     this.viewMediaCancelBtn = page.locator(EncMediaLocators.viewMediaCancelBtn);
-
-
-
 
     //view media
 
-    this.viewMediaEditButton = page.getByRole('button', { name: EncMediaLocators.viewMediaEditButton });
+    this.viewMediaEditButton = page.getByRole("button", {
+      name: EncMediaLocators.viewMediaEditButton,
+    });
     this.viewIcon = page.getByAltText(EncMediaLocators.viewIcon);
     this.viewMediaProducts = page.locator(EncMediaLocators.viewMediaProducts);
-    this.viewMediaFileTypeIcon = page.locator(EncMediaLocators.viewMediaFileTypeIcon)
-    this.viewMediaVideoTypeIcon = page.locator(EncMediaLocators.viewMediaVideoTypeIcon)
-    this.viewMediaAudioTypeIcon = page.locator(EncMediaLocators.viewMediaAudioTypeIcon)
-    this.viewMediaLanguage = page.locator(EncMediaLocators.viewMediaLanguage)
+    this.viewMediaFileTypeIcon = page.locator(
+      EncMediaLocators.viewMediaFileTypeIcon,
+    );
+    this.viewMediaVideoTypeIcon = page.locator(
+      EncMediaLocators.viewMediaVideoTypeIcon,
+    );
+    this.viewMediaAudioTypeIcon = page.locator(
+      EncMediaLocators.viewMediaAudioTypeIcon,
+    );
+    this.viewMediaLanguage = page.locator(EncMediaLocators.viewMediaLanguage);
     this.viewMediaTitle = page.locator(EncMediaLocators.viewMediaTitle);
 
     //Mutliple Delete Locators
-    this.MultipleDeleteEncMedia = page.getByRole('button', { name: EncMediaLocators.multipleDeleteEncMedia, });
-    this.deleteConfirmDialog = page.getByRole('dialog');
-    this.confirmDeleteBtn = this.deleteConfirmDialog.getByRole('button', { name: 'Yes,delete', });
-    this.confirmDeleteCancelBtn = this.deleteConfirmDialog.getByRole('button', { name: 'Cancel', });
+    this.MultipleDeleteEncMedia = page.getByRole("button", {
+      name: EncMediaLocators.multipleDeleteEncMedia,
+    });
+    this.deleteConfirmDialog = page.getByRole("dialog");
+    this.confirmDeleteBtn = this.deleteConfirmDialog.getByRole("button", {
+      name: "Yes,delete",
+    });
+    this.confirmDeleteCancelBtn = this.deleteConfirmDialog.getByRole("button", {
+      name: "Cancel",
+    });
   }
 
   /* ----------------------------------------------------
@@ -151,17 +226,14 @@ export class EncMediapage {
     await expect(this.UpdatePopupTitle).toBeVisible();
   }
 
-
-
   /* ----------------------------------------------------
      FORM HELPERS
   ---------------------------------------------------- */
 
   async readEncMediaForm() {
-
-
     const mediaType = await this.CreatePopMediaTypeDropdown.inputValue();
-    const decryption_Algorithm = await this.CreatePopDecryptionAlgorithmDropdown.inputValue();
+    const decryption_Algorithm =
+      await this.CreatePopDecryptionAlgorithmDropdown.inputValue();
 
     const existingData = {
       title: await this.CreatePopTitleInput.inputValue(),
@@ -172,28 +244,27 @@ export class EncMediapage {
       decryption_Algorithm,
       thumbnail_url: await this.CreatePopThumbnailURLInput.inputValue(),
       duration: await this.CreatePopDurationInput.inputValue(),
-      // productNames: await this.CreatePopProductNameInput.inputValue(),
+      productNames: await this.CreatePopProductNameInput.inputValue(),
     };
 
-    if (mediaType === 'Audio') {
+    if (mediaType === "Audio") {
       existingData.backgroudplay =
         await this.CreatePopEnableBackgroundCheckbox.isChecked();
 
       existingData.controllerOption =
         await this.CreatePopDisableControllerCheckbox.isChecked();
     }
-    if (mediaType === 'Video') {
+    if (mediaType === "Video") {
       existingData.controllerOption =
         await this.CreatePopDisableControllerCheckbox.isChecked();
     }
 
     if (decryption_Algorithm === "aesGcm" || decryption_Algorithm === "Both") {
-      existingData.nonce =
-        await this.CreatePopNonceInput.inputValue();
+      existingData.nonce = await this.CreatePopNonceInput.inputValue();
     }
 
     console.log("form data:", existingData);
-    return existingData
+    return existingData;
   }
 
   async closeModal() {
@@ -209,7 +280,11 @@ export class EncMediapage {
     await openPopup(this.createNewBtn, this.CreatePopupTitle);
 
     await handleInput(this.CreatePopTitleInput, data.title);
-    await handleMantineSelect(this.CreatePopMediaTypeDropdown, data.mediaType, this.page);
+    await handleMantineSelect(
+      this.CreatePopMediaTypeDropdown,
+      data.mediaType,
+      this.page,
+    );
     await handleInput(this.CreatePopMediaSizeInput, data.mediaSize);
     await handleInput(this.CreatePopLanguageInput, data.language);
     await handleInput(this.CreatePopMediaURLInput, data.encMedia_url);
@@ -224,14 +299,24 @@ export class EncMediapage {
     }
 
     if (data.mediaType === "Audio" || data.mediaType === "Video") {
-      await handleMantineSelect(this.CreatePopDecryptionAlgorithmDropdown, data.decryption_Algorithm, this.page);
-      if (data.decryption_Algorithm === "aesGcm" || data.decryption_Algorithm === "Both") {
+      await handleMantineSelect(
+        this.CreatePopDecryptionAlgorithmDropdown,
+        data.decryption_Algorithm,
+        this.page,
+      );
+      if (
+        data.decryption_Algorithm === "aesGcm" ||
+        data.decryption_Algorithm === "Both"
+      ) {
         await handleInput(this.CreatePopNonceInput, data.nonce);
       }
     }
 
-    await handleMutliSelect(this.CreatePopProductNameInput, data.productNames, this.page);
-
+    await handleMutliSelect(
+      this.CreatePopProductNameInput,
+      data.productNames,
+      this.page,
+    );
 
     const title = await this.CreatePopTitleInput.inputValue();
     await this.CreatePopCreateBtn.click();
@@ -249,11 +334,18 @@ export class EncMediapage {
     const OldData = await this.readEncMediaForm();
 
     await handleInput(this.CreatePopTitleInput, data.updatedTittle);
-    await handleMantineSelect(this.CreatePopMediaTypeDropdown, data.updatedMediaType, this.page);
+    await handleMantineSelect(
+      this.CreatePopMediaTypeDropdown,
+      data.updatedMediaType,
+      this.page,
+    );
     await handleInput(this.CreatePopMediaSizeInput, data.updatedMediaSize);
     await handleInput(this.CreatePopLanguageInput, data.updatedLanguage);
     await handleInput(this.CreatePopMediaURLInput, data.updatedEncMedia_url);
-    await handleInput(this.CreatePopThumbnailURLInput, data.updatedThumbnail_url);
+    await handleInput(
+      this.CreatePopThumbnailURLInput,
+      data.updatedThumbnail_url,
+    );
     await handleInput(this.CreatePopDurationInput, data.updatedDuration);
 
     if (data.updatedBackgroudplay === "TRUE") {
@@ -264,14 +356,28 @@ export class EncMediapage {
       await this.CreatePopDisableControllerCheckbox.check();
     }
 
-    if (data.updatedMediaType === "Audio" || data.updatedMediaType === "Video") {
-      await handleMantineSelect(this.CreatePopDecryptionAlgorithmDropdown, data.updatedDecryption_Algorithm, this.page);
-      if (data.updatedDecryption_Algorithm === "aesGcm" || data.updatedDecryption_Algorithm === "Both") {
+    if (
+      data.updatedMediaType === "Audio" ||
+      data.updatedMediaType === "Video"
+    ) {
+      await handleMantineSelect(
+        this.CreatePopDecryptionAlgorithmDropdown,
+        data.updatedDecryption_Algorithm,
+        this.page,
+      );
+      if (
+        data.updatedDecryption_Algorithm === "aesGcm" ||
+        data.updatedDecryption_Algorithm === "Both"
+      ) {
         await handleInput(this.CreatePopNonceInput, data.updatedNonce);
       }
     }
 
-    await handleMutliSelect(this.CreatePopProductNameInput, data.updatedProductNames, this.page);
+    await handleMutliSelect(
+      this.CreatePopProductNameInput,
+      data.updatedProductNames,
+      this.page,
+    );
 
     if (await this.updateBtn.isDisabled()) {
       await this.closeModal();
@@ -298,9 +404,7 @@ export class EncMediapage {
       .click();
 
     await this.page.waitForLoadState("networkidle");
-
   }
-
 
   //To select checkbox by title
   async selectRowCheckboxByTitle(title) {
@@ -314,9 +418,7 @@ export class EncMediapage {
     }
   }
 
-
   async deleteMultipleByTitles(titles) {
-
     for (const title of titles) {
       await this.selectRowCheckboxByTitle(title);
     }
@@ -328,6 +430,9 @@ export class EncMediapage {
     await this.confirmDeleteBtn.click();
   }
 
+  /* ----------------------------------------------------
+      SEARCH
+   ---------------------------------------------------- */
 
   async searchByProducts(productNames) {
     const productList = productNames
@@ -357,7 +462,7 @@ export class EncMediapage {
       await expect(option).toBeVisible({ timeout: 5000 });
       await option.click();
     }
-    await this.page.keyboard.press('Escape');
+    await this.page.keyboard.press("Escape");
     //wait for 5 sec
     await this.page.waitForTimeout(5000);
   }
@@ -366,7 +471,7 @@ export class EncMediapage {
     const productNames = data.productNames;
     await this.searchByProducts(productNames);
     if (await this.noResourcesEncMedia.isVisible()) {
-      allure.attachment(
+      allure.attachment(    
         "Search Result",
         `No resources available for the searched product names for ${data.test_id}`,
         "text/plain",
@@ -430,9 +535,6 @@ export class EncMediapage {
     }
   }
 
-
-
-
   /* ----------------------------------------------------
    VIEW
 ---------------------------------------------------- */
@@ -467,8 +569,5 @@ export class EncMediapage {
     }
 
     return { title: tit, language, productNames };
-
   }
-
 }
-
