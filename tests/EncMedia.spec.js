@@ -1,0 +1,409 @@
+import { test, expect } from "@playwright/test";
+import { LoginPage } from "../pages/LoginPage";
+import { readSheet } from "../utils/sheetReader";
+import { ENC_MEDIA_SHEET_URL } from "../utils/config";
+import { EncMediapage } from "../pages/EncMediaPage";
+import { handleMantineSelect, isErrorExpected, openPopup, refreshList } from "../utils/dateUtils";
+import { validateResult } from "../utils/validateResult";
+
+// let page;
+let testData = await readSheet(ENC_MEDIA_SHEET_URL);
+
+function normalize(val) {
+  if (val === null || val === undefined) return "";
+  return val.toString().toLowerCase().trim();
+}
+
+function resolveFinal(newValue, oldValue) {
+  console.log(`oldvalue: ${oldValue} -> newvalue :${newValue}`);
+  if (newValue === null || newValue === undefined || newValue === "null") return oldValue;
+  if (newValue === "") return ""; // validation case
+  return newValue;
+}
+
+test.describe("Enc Media", () => {
+
+  test.beforeEach(async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const encMediaPage = new EncMediapage(page);
+
+
+    await loginPage.goto("login");
+    await loginPage.login(
+      "test-tenant-admin-in@abovecloud9.ai",
+      "Abovecloud@ac9"
+    );
+    await page.waitForTimeout(5000);
+
+    await encMediaPage.encMediaIcon.click();
+    await page.waitForTimeout(5000);
+
+
+  });
+  testData.forEach((data) => {
+
+    const testMode = data.execute === "skip" ? test.skip : test;
+
+    testMode(`${data.test_id} | ${data.action}`, async ({ page }) => {
+
+      const encMediaPage = new EncMediapage(page);
+
+
+      const expectedValues = data.expected.split(",").map((v) => v.trim());
+      const errorExpected = isErrorExpected(expectedValues);
+      console.log("error expected:", errorExpected);
+
+      // switch (data.action) {
+      //   case 'create': {
+      //     const createdTitle = await encMediaPage.createEncMedia(data);
+      //     await validateResult(expectedValues, { encMediaPage });
+
+      //     await page.waitForTimeout(5000);
+      //     console.log("createdData", createdTitle)
+      //     if (!errorExpected) {
+      //       console.log("validate result for data finding");
+      //       await encMediaPage.findRowAndAction(page, { title: createdTitle }, "assertPresent");
+      //     }
+      //     break;
+
+      //   }
+      //   case "update": {
+      //     const result = await encMediaPage.updateEncMedia(data);
+
+      //     await validateResult(expectedValues, { encMediaPage });
+
+      //     if (!errorExpected && result.status === "UPDATED") {
+      //       const verifyData = {
+      //         title: resolveFinal(data.updatedTittle, result.existing.title),
+      //         mediaType: resolveFinal(data.updatedMediaType, result.existing.mediaType),
+      //         mediaSize: resolveFinal(data.updatedMediaSize, result.existing.mediaSize),
+      //         language: resolveFinal(data.updatedLanguage, result.existing.language),
+      //         encMedia_url: resolveFinal(data.updatedEncMedia_url, result.existing.encMedia_url),
+      //         decryption_Algorithm: resolveFinal(
+      //           data.updatedDecryption_Algorithm,
+      //           result.existing.decryption_Algorithm
+      //         ),
+      //         thumbnail_url: resolveFinal(
+      //           data.updatedThumbnail_url,
+      //           result.existing.thumbnail_url
+      //         ),
+      //         duration: resolveFinal(data.updatedDuration, result.existing.duration),
+      //         productNames: resolveFinal(
+      //           data.updatedProductNames,
+      //           result.existing.productNames
+      //         ),
+      //         nonce: resolveFinal(data.updatedNonce, result.existing.nonce),
+      //       };
+
+
+      //       console.log("verifing data after update:", verifyData);
+
+      //       await encMediaPage.findRowAndAction(page, verifyData, "assertPresent");
+      //     }
+      //     break;
+
+      //   }
+      //   case "delete": {
+      //     await encMediaPage.deleteEncMedia(data);
+      //     await validateResult(expectedValues, { encMediaPage });
+
+      //     if (!errorExpected) {
+      //       await encMediaPage.findRowAndAction(page, data, "assertNotPresent");
+      //     }
+      //     break;
+      //   }
+      //   default: {
+      //     throw new Error(`❌ Invalid action in sheet: ${data.action}`);
+      //   }
+      // }
+
+
+      if (data.action === "create") {
+        const title = await encMediaPage.createEncMedia(data);
+        await validateResult(expectedValues, { encMediaPage });
+
+        await page.waitForTimeout(3000);
+
+
+        if (!errorExpected) {
+          await encMediaPage.openEditModalByTitle(title);
+          const actual = await encMediaPage.readEncMediaForm();
+          console.log("ACTUAL FORM DATA:", actual);
+          for (const key of Object.keys(actual)) {
+            // skip validation fields not provided in sheet
+            if (data[key] === null || data[key] === undefined) continue;
+
+            expect(
+              normalize(actual[key]),
+              `Mismatch in field: ${key}`
+            ).toBe(normalize(data[key]));
+          }
+
+          ///////
+          await encMediaPage.closeModal();
+
+        }
+      }
+
+      if (data.action === "update") {
+        const result = await encMediaPage.updateEncMedia(data);
+        await validateResult(expectedValues, { encMediaPage });
+
+        await page.waitForTimeout(5000);
+        if (result.status === "UPDATED" && !errorExpected) {
+          // 🔹 Decide which title to search
+          const finalTitle = resolveFinal(
+            data.updatedTittle,
+            result.OldData.title
+          );
+
+          // 🔹Open edit modal using FINAL title
+          await encMediaPage.openEditModalByTitle(finalTitle);
+
+          const actual = await encMediaPage.readEncMediaForm();
+          console.log("UPDATED FORM DATA:", actual);
+
+          const finalMediaType = resolveFinal(
+            data.updatedMediaType,
+            result.OldData.mediaType
+          );
+
+          const finalDecryptionAlgo = resolveFinal(
+            data.updatedDecryption_Algorithm,
+            result.OldData.decryption_Algorithm
+          );
+
+          // 🔹 Base expected object (always present)
+          const expected = {
+            title: resolveFinal(data.updatedTittle, result.OldData.title),
+            mediaType: finalMediaType,
+            mediaSize: resolveFinal(data.updatedMediaSize, result.OldData.mediaSize),
+            language: resolveFinal(data.updatedLanguage, result.OldData.language),
+            encMedia_url: resolveFinal(
+              data.updatedEncMedia_url,
+              result.OldData.encMedia_url
+            ),
+            decryption_Algorithm: finalDecryptionAlgo,
+            thumbnail_url: resolveFinal(
+              data.updatedThumbnail_url,
+              result.OldData.thumbnail_url
+            ),
+            duration: resolveFinal(
+              data.updatedDuration,
+              result.OldData.duration
+            ),
+          };
+
+
+          if (finalMediaType === "Audio") {
+            expected.backgroudplay = resolveFinal(
+              data.updatedBackgroudplay,
+              result.OldData.backgroudplay
+            );
+
+            expected.controllerOption = resolveFinal(
+              data.updatedControllerOption,
+              result.OldData.controllerOption
+            );
+          }
+
+          if (finalMediaType === "Video") {
+            expected.controllerOption = resolveFinal(
+              data.updatedControllerOption,
+              result.OldData.controllerOption);
+          }
+          if (finalDecryptionAlgo === "aesGcm" || finalDecryptionAlgo === "aesHls128") {
+            expected.nonce = resolveFinal(data.updatedNonce, result.OldData.nonce);
+          }
+
+          for (const key of Object.keys(expected)) {
+            expect(
+              normalize(actual[key]),
+              `Mismatch in field: ${key}`
+            ).toBe(normalize(expected[key]));
+          }
+
+
+          await encMediaPage.closeModal();
+        }
+      }
+
+      if (data.action === "delete") {
+        const titles = data.title.includes(",")
+          ? data.title.split(",").map((t) => t.trim())
+          : [data.title];
+        console.log("Deleting titles:", titles);
+        if (titles.length === 1) {
+          //  single delete
+          await encMediaPage.deleteByTitle(titles[0]);
+        } else {
+          //  multiple delete
+          await encMediaPage.deleteMultipleByTitles(titles);
+        }
+        await validateResult(expectedValues, { encMediaPage });
+
+        // Verify all rows
+        for (const title of titles) {
+          await encMediaPage.waitForRowToBeDeleted(title.trim());
+        }
+      }
+
+      if (data.action === "view") {
+        const result = await encMediaPage.viewByTitle(data.title, data.mediaType);
+        await validateResult(expectedValues, { encMediaPage });
+        await page.waitForTimeout(3000);
+        await expect(data.title).toBe(result.title);
+        await expect(data.language).toBe(result.language);
+
+        const expectedProducts = data.productNames
+          .split(",")
+          .map(p => p.trim())
+          .sort();
+
+        const actualProducts = result.productNames
+          .map(p => p.trim())
+          .sort();
+
+        // console.log('Expected:', expectedProducts);
+        // console.log('Actual:', actualProducts);
+
+        await expect(actualProducts).toEqual(expectedProducts);
+      }
+      //search functionality
+       if(data.action==="search"){
+        console.log(`Searching for products: ${data.productNames}`);
+        await encMediaPage.searchProductByview(data);
+        await page.waitForTimeout(3000);
+      }
+
+    }
+    );
+  });
+
+
+  test('testing refresh button', async ({ page }) => {
+
+    const encMediaPage = new EncMediapage(page);
+    await refreshList(
+      encMediaPage.refreshBtn,
+      encMediaPage.toasts,
+    );
+  });
+
+  test('testing logout', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.logout();
+  });
+
+  test('testing close icon in creating', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await encMediaPage.cancelBtnX.click();
+    await expect(encMediaPage.CreatePopupTitle).not.toBeVisible();
+  })
+
+  test('testing media type(audio) and their respective checkboxes visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Audio", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).toBeVisible();
+
+  })
+
+  test('testing  media type(video) and their respective checkboxes visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Video", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).toBeVisible();
+  })
+
+  test('testing media types(document) and their respective checkboxes visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Document", page);
+    await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDisableControllerCheckbox).not.toBeVisible();
+    await expect(encMediaPage.CreatePopDecryptionAlgorithmDropdown).not.toBeVisible();
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+
+  })
+
+  test('testing decryption algorithms(aesGcm) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "aesGcm", page);
+    await expect(encMediaPage.CreatePopNonceInput).toBeVisible();
+  })
+
+  test('testing decryption algorithms(both) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "Both", page);
+    await expect(encMediaPage.CreatePopNonceInput).toBeVisible();
+  })
+
+
+  test('testing decryption algorithms(aesHls128) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "aesHls128", page);
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+  })
+
+  test('testing decryption algorithms(none) and nonce visibility', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+    await openPopup(encMediaPage.createNewBtn, encMediaPage.CreatePopupTitle);
+    await handleMantineSelect(encMediaPage.CreatePopDecryptionAlgorithmDropdown, "None", page);
+    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
+  })
+
+
+  test('testing close icon in updating', async ({ page }) => {
+    const encMediaPage = new EncMediapage(page);
+
+    // const updateData = testData.filter((el)=>el.action === "update");
+    const editIcon = await page.locator("xpath=/html[1]/body[1]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/table[1]/tbody[1]/tr[1]/td[6]/div[1]/button[2]/img[1]");
+    await editIcon.click();
+    await encMediaPage.cancelBtnX.click();
+    await expect(encMediaPage.UpdatePopupTitle).not.toBeVisible();
+  })
+
+});
+
+test('glad user login(IN)', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const encMediaPage = new EncMediapage(page);
+
+
+  await loginPage.goto("login");
+  await loginPage.login(
+    "test-glad-user-in@abovecloud9.ai",
+    "Abovecloud@ac9"
+  );
+  await page.waitForTimeout(5000);
+
+  await expect(encMediaPage.encMediaIcon).not.toBeVisible();
+})
+
+
+test('glad user login(US)', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const encMediaPage = new EncMediapage(page);
+
+
+  await loginPage.goto("login");
+  await loginPage.login(
+    "test-glad-user@abovecloud9.ai",
+    "Abovecloud@ac9"
+  );
+  await page.waitForTimeout(5000);
+
+  await expect(encMediaPage.encMediaIcon).not.toBeVisible();
+})
+
+
+
+

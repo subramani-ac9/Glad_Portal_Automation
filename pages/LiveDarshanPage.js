@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { LiveDarshanLocators } from "../locators/LiveDarshanLocators";
-import { findRowAndAction, toInputDateFormat } from "../utils/dateUtils";
+import { findRowAndAction, toInputDateFormat, handleInput,refreshList, getRowData, openPopup } from "../utils/dateUtils";
 
 export class LiveDarshanPage {
   constructor(page) {
@@ -79,34 +79,6 @@ export class LiveDarshanPage {
     this.NoData = page.getByText("No data available").last();
   }
 
-  async handleInput(locator, value) {
-    if (value === null || value === undefined || value === "null") {
-      return false;
-    } // skip
-
-    if (value === "") {
-      await locator.clear();
-      return true; // cleared
-    }
-
-    const existingValue = (await locator.inputValue()).trim();
-    const newValue = value.toString().trim();
-
-    if (existingValue === newValue) return false; // no change
-
-    await locator.fill(newValue);
-    return true; // updated
-  }
-
-  async openCreatePopup() {
-    await this.createNewBtn.click();
-    await this.createPopupTitle.waitFor({ state: "visible" });
-  }
-
-  async refreshList() {
-    await this.refreshBtn.click();
-  }
-
   // ======================================================
   // 🔹 CREATE
   // ======================================================
@@ -114,20 +86,20 @@ export class LiveDarshanPage {
     console.log(
       `Creating Live Darshan with data:, ${data.action} | ${data.date} | ${data.start_time}, ${data.timezone}`,
     );
-    await this.openCreatePopup();
+    await openPopup(this.createNewBtn, this.createPopupTitle);
 
-    await this.handleInput(this.quickScheduleInput, data.quick_schedule);
+    await handleInput(this.quickScheduleInput, data.quick_schedule);
     console.log("toInputDateFormat(data.date)", toInputDateFormat(data.date));
-    await this.handleInput(this.dateInput, toInputDateFormat(data.date));
+    await handleInput(this.dateInput, toInputDateFormat(data.date));
 
-    await this.handleInput(this.startTimeInput, data.start_time);
-    await this.handleInput(this.timezoneInput, data.timezone);
+    await handleInput(this.startTimeInput, data.start_time);
+    await handleInput(this.timezoneInput, data.timezone);
 
     if (data.auto_zoom === "TRUE") {
       await this.autoZoomCheckbox.check();
     } else {
       await this.autoZoomCheckbox.uncheck();
-      await this.handleInput(this.meetingUrlInput, data.meeting_url);
+      await handleInput(this.meetingUrlInput, data.meeting_url);
     }
 
     const createdData = {
@@ -177,7 +149,7 @@ export class LiveDarshanPage {
     // 3️⃣ Update fields dynamically
     let isUpdated = false;
     for (const field of fieldsToUpdate) {
-      const updated = await this.handleInput(field.locator, field.value);
+      const updated = await handleInput(field.locator, field.value);
       isUpdated ||= updated; // mark if any field changed
     }
 

@@ -1,3 +1,3 @@
 export const LOGIN_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR2B8suh6wQrXccVKnONhed1vyZ_CsIG4S9ciQDbaQP_vNR6oMHKxv-zeQhq6Gloyktwnw2zDVWST2I/pub?gid=419522084&single=true&output=csv';
-export const LIVE_DARSHAN_SHEET_URL = 
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vR2B8suh6wQrXccVKnONhed1vyZ_CsIG4S9ciQDbaQP_vNR6oMHKxv-zeQhq6Gloyktwnw2zDVWST2I/pub?gid=1716841094&single=true&output=csv"
+export const LIVE_DARSHAN_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2B8suh6wQrXccVKnONhed1vyZ_CsIG4S9ciQDbaQP_vNR6oMHKxv-zeQhq6Gloyktwnw2zDVWST2I/pub?gid=1716841094&single=true&output=csv"
+export const ENC_MEDIA_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2B8suh6wQrXccVKnONhed1vyZ_CsIG4S9ciQDbaQP_vNR6oMHKxv-zeQhq6Gloyktwnw2zDVWST2I/pub?gid=822363333&single=true&output=csv"
