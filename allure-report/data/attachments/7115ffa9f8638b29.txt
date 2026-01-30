@@ -1,4 +1,0 @@
-test-tenant-admin-in@abovecloud9.ai Abovecloud@ac9
-error expected: false
-Searching for products: Happiness Program ()
-Selecting product: Happiness Program ()
