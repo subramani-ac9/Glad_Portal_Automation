@@ -68,7 +68,7 @@ export class EncMediapage {
     this.CreatePopThumbnailURL_invalid_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_invalid_Error);
     this.CreatePopThumbnailURL_Maximum_Error = page.getByText(EncMediaLocators.CreatePopThumbnailURL_Maximum_Error);
 
-    this.toasts = page.locator(EncMediaLocators.toasts);;
+    this.toasts = page.locator(EncMediaLocators.toasts);
 
 
     //view media
