@@ -7,17 +7,24 @@ import { LOGIN_SHEET_URL } from "../utils/config";
 import { validateResult } from "../utils/validateResult";
 
 let testData = await readSheet(LOGIN_SHEET_URL);
-console.log(testData);
 testData = testData.filter((data) => {
     if (data.execute?.toLowerCase() === "run") {
-      // console.log(data);
       return data;
     }
   });
 
 test.describe("Login Tests (Google Sheet)", () => {
   for (const data of testData) {
-    test(`Login → ${data.username || "EMPTY"} | ${data.expected}`, async ({
+
+    const tags = data.Test_tags
+      ? data.Test_tags
+          .toLowerCase()
+          .split(",")
+          .map((tag) => `@${tag.trim()}`)
+          .join(" ")
+      : "";
+
+    test(`Login → ${data.Test_Id} ${tags}`, async ({
       page,
     }) => {
       const loginPage = new LoginPage(page);

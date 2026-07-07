@@ -72,8 +72,8 @@ export class LiveDarshanPage {
       { exact: true },
     );
 
-    this.createEditDeleteSuccessMsg = page.locator(
-      LiveDarshanLocators.create_edit_delete_success_msg,
+    this.toasts = page.locator(
+      LiveDarshanLocators.toasts,
     );
 
     this.NoData = page.getByText("No data available").last();
@@ -89,7 +89,6 @@ export class LiveDarshanPage {
     await openPopup(this.createNewBtn, this.createPopupTitle);
 
     await handleInput(this.quickScheduleInput, data.quick_schedule);
-    console.log("toInputDateFormat(data.date)", toInputDateFormat(data.date));
     await handleInput(this.dateInput, toInputDateFormat(data.date));
 
     await handleInput(this.startTimeInput, data.start_time);

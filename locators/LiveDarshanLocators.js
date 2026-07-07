@@ -39,5 +39,5 @@ export const LiveDarshanLocators = {
     "xpath=/html/body/div[18]/div/div/div/div[2]/section/div[2]/form/div[3]/div[2]",
   update_start_time_error:
     "xpath=/html/body/div[18]/div/div/div/div[2]/section/div[2]/form/div[1]/div[2]/div/div[2]",
-  create_edit_delete_success_msg: ".mantine-Notification-body",
+ toasts: ".mantine-Notification-body",
 };

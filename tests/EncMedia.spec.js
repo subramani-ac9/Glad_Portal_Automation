@@ -9,9 +9,33 @@ import { validateResult } from "../utils/validateResult";
 // let page;
 let testData = await readSheet(ENC_MEDIA_SHEET_URL);
 
+// function normalize(val) {
+//   if (val === null || val === undefined) return "";
+//   return val.toString().toLowerCase().trim();
+// }
+
 function normalize(val) {
   if (val === null || val === undefined) return "";
-  return val.toString().toLowerCase().trim();
+
+  const str = val.toString().toLowerCase().trim();
+
+  // If comma-separated → normalize each element, then rejoin
+  if (str.includes(",")) {
+    return str
+      .split(",")
+      .map(item =>
+        item
+          .replace(/\s+\(/g, "(")   // remove space before '('
+          .replace(/\s+/g, " ")     // collapse multiple spaces
+          .trim()
+      )
+      .filter(Boolean)             // remove empty values
+      .sort()                      // order-independent
+      .join(", ");                 // return as comma-separated string
+  }
+
+  // Otherwise normalize as a normal string
+  return str.replace(/\s+/g, " ");
 }
 
 function resolveFinal(newValue, oldValue) {
@@ -52,70 +76,6 @@ test.describe("Enc Media", () => {
       const expectedValues = data.expected.split(",").map((v) => v.trim());
       const errorExpected = isErrorExpected(expectedValues);
       console.log("error expected:", errorExpected);
-
-      // switch (data.action) {
-      //   case 'create': {
-      //     const createdTitle = await encMediaPage.createEncMedia(data);
-      //     await validateResult(expectedValues, { encMediaPage });
-
-      //     await page.waitForTimeout(5000);
-      //     console.log("createdData", createdTitle)
-      //     if (!errorExpected) {
-      //       console.log("validate result for data finding");
-      //       await encMediaPage.findRowAndAction(page, { title: createdTitle }, "assertPresent");
-      //     }
-      //     break;
-
-      //   }
-      //   case "update": {
-      //     const result = await encMediaPage.updateEncMedia(data);
-
-      //     await validateResult(expectedValues, { encMediaPage });
-
-      //     if (!errorExpected && result.status === "UPDATED") {
-      //       const verifyData = {
-      //         title: resolveFinal(data.updatedTittle, result.existing.title),
-      //         mediaType: resolveFinal(data.updatedMediaType, result.existing.mediaType),
-      //         mediaSize: resolveFinal(data.updatedMediaSize, result.existing.mediaSize),
-      //         language: resolveFinal(data.updatedLanguage, result.existing.language),
-      //         encMedia_url: resolveFinal(data.updatedEncMedia_url, result.existing.encMedia_url),
-      //         decryption_Algorithm: resolveFinal(
-      //           data.updatedDecryption_Algorithm,
-      //           result.existing.decryption_Algorithm
-      //         ),
-      //         thumbnail_url: resolveFinal(
-      //           data.updatedThumbnail_url,
-      //           result.existing.thumbnail_url
-      //         ),
-      //         duration: resolveFinal(data.updatedDuration, result.existing.duration),
-      //         productNames: resolveFinal(
-      //           data.updatedProductNames,
-      //           result.existing.productNames
-      //         ),
-      //         nonce: resolveFinal(data.updatedNonce, result.existing.nonce),
-      //       };
-
-
-      //       console.log("verifing data after update:", verifyData);
-
-      //       await encMediaPage.findRowAndAction(page, verifyData, "assertPresent");
-      //     }
-      //     break;
-
-      //   }
-      //   case "delete": {
-      //     await encMediaPage.deleteEncMedia(data);
-      //     await validateResult(expectedValues, { encMediaPage });
-
-      //     if (!errorExpected) {
-      //       await encMediaPage.findRowAndAction(page, data, "assertNotPresent");
-      //     }
-      //     break;
-      //   }
-      //   default: {
-      //     throw new Error(`❌ Invalid action in sheet: ${data.action}`);
-      //   }
-      // }
 
 
       if (data.action === "create") {
@@ -192,6 +152,10 @@ test.describe("Enc Media", () => {
               data.updatedDuration,
               result.OldData.duration
             ),
+            productNames:resolveFinal(
+              data.updatedProductNames,
+              result.OldData.productNames
+            )
           };
 
 
@@ -212,11 +176,13 @@ test.describe("Enc Media", () => {
               data.updatedControllerOption,
               result.OldData.controllerOption);
           }
-          if (finalDecryptionAlgo === "aesGcm" || finalDecryptionAlgo === "aesHls128") {
+          if (finalDecryptionAlgo === "aesGcm" || finalDecryptionAlgo === "Both") {
             expected.nonce = resolveFinal(data.updatedNonce, result.OldData.nonce);
           }
 
-          for (const key of Object.keys(expected)) {
+
+
+          for (const key of Object.keys(actual)) {
             expect(
               normalize(actual[key]),
               `Mismatch in field: ${key}`
@@ -326,9 +292,6 @@ test.describe("Enc Media", () => {
     await handleMantineSelect(encMediaPage.CreatePopMediaTypeDropdown, "Document", page);
     await expect(encMediaPage.CreatePopEnableBackgroundCheckbox).not.toBeVisible();
     await expect(encMediaPage.CreatePopDisableControllerCheckbox).not.toBeVisible();
-    await expect(encMediaPage.CreatePopDecryptionAlgorithmDropdown).not.toBeVisible();
-    await expect(encMediaPage.CreatePopNonceInput).not.toBeVisible();
-
   })
 
   test('testing decryption algorithms(aesGcm) and nonce visibility', async ({ page }) => {

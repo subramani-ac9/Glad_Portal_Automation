@@ -11,14 +11,15 @@ import {
 } from "../utils/dateUtils";
 
 function resolveFinal(newValue, oldValue) {
-  if (newValue === null || newValue === undefined) return oldValue;
+  if (newValue === null || newValue === undefined || newValue === "null")
+    return oldValue;
   if (newValue === "") return ""; // validation case
   return newValue;
 }
 
 let testData = await readSheet(LIVE_DARSHAN_SHEET_URL);
 
-console.log(testData)
+console.log(testData);
 let runnableTests = testData.filter((data) => {
   if (data.execute?.toLowerCase() === "run") {
     return data;
@@ -37,7 +38,18 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
   console.log("runnable:", runnableTests);
 
   runnableTests.forEach((data) => {
-    test(`Live Darshan | ${data.test_id} | ${data.action}`, async ({ page }) => {
+    const tags = data.Test_tags
+      ? data.Test_tags
+          .toLowerCase()
+          .split(",")
+          .map((tag) => `@${tag.trim()}`)
+          .join(" ")
+      : "";
+
+
+    test(`Live Darshan | ${data.test_id} | ${data.action} ${tags}`, async ({
+      page,
+    }) => {
       const liveDarshanPage = new LiveDarshanPage(page);
 
       const expectedValues = data.expected.split(",").map((v) => v.trim());
@@ -49,6 +61,8 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
           const createdData = await liveDarshanPage.createLiveDarshan(data);
           console.log("created data:", createdData);
           await validateResult(expectedValues, { liveDarshanPage });
+          await page.waitForTimeout(3000);
+
           if (!errorExpected) {
             const row = await findRowAndAction(page, createdData, "getRow");
             if (createdData.auto_zoom === "TRUE") {
@@ -72,6 +86,7 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
             break;
           }
           await validateResult(expectedValues, { liveDarshanPage });
+          await page.waitForTimeout(3000);
 
           if (!errorExpected && result.status === "UPDATED") {
             const verifyData = {
@@ -85,6 +100,11 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
                 result.existing.timezone,
               ),
             };
+            console.log(
+              "time after update",
+              data.UpdateStart_time,
+              result.existing.start_time,
+            );
 
             console.log("verifing data after update:", verifyData);
 
@@ -113,11 +133,8 @@ test.describe("Live Darshan – Sheet Driven Tests", () => {
     });
   });
 
-  test("Testing Refresh button", async () => {
+  test("Testing Refresh button", async ({ page }) => {
     const liveDarshanPage = new LiveDarshanPage(page);
-    await refreshList(
-      liveDarshanPage.refreshBtn,
-      liveDarshanPage.createEditDeleteSuccessMsg,
-    );
+    await refreshList(liveDarshanPage.refreshBtn, liveDarshanPage.toasts);
   });
 });

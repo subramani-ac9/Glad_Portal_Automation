@@ -130,9 +130,9 @@ export class EncMediapage {
       EncMediaLocators.CreatePopThumbnailURL_Maximum_Error,
     );
 
-    this.toasts = page.locator(EncMediaLocators.toasts);
+    this.toasts = page.locator(EncMediaLocators.toasts).nth(0);
 
-    //serach input
+    //search input
     this.searchInputEncMedia = page.locator(
       EncMediaLocators.searchInputEncMedia,
     );
@@ -142,10 +142,7 @@ export class EncMediapage {
     this.viewMediaCancelBtn = page.locator(EncMediaLocators.viewMediaCancelBtn);
 
     //view media
-
-    this.viewMediaEditButton = page.getByRole("button", {
-      name: EncMediaLocators.viewMediaEditButton,
-    });
+    this.viewMediaEditButton = page.locator('button:has-text("Edit")');
     this.viewIcon = page.getByAltText(EncMediaLocators.viewIcon);
     this.viewMediaProducts = page.locator(EncMediaLocators.viewMediaProducts);
     this.viewMediaFileTypeIcon = page.locator(
@@ -232,20 +229,35 @@ export class EncMediapage {
 
   async readEncMediaForm() {
     const mediaType = await this.CreatePopMediaTypeDropdown.inputValue();
-    const decryption_Algorithm =
-      await this.CreatePopDecryptionAlgorithmDropdown.inputValue();
 
+    let decryption_Algorithm;
+
+    if (mediaType === "Video" || mediaType === "Audio") {
+      if (await this.CreatePopDecryptionAlgorithmDropdown.isVisible()) {
+        decryption_Algorithm =
+          await this.CreatePopDecryptionAlgorithmDropdown.inputValue();
+      }
+    }
+
+    console.log(await this.CreatePopProductNameInput.inputValue());
     const existingData = {
       title: await this.CreatePopTitleInput.inputValue(),
       mediaType,
       mediaSize: await this.CreatePopMediaSizeInput.inputValue(),
       language: await this.CreatePopLanguageInput.inputValue(),
       encMedia_url: await this.CreatePopMediaURLInput.inputValue(),
-      decryption_Algorithm,
       thumbnail_url: await this.CreatePopThumbnailURLInput.inputValue(),
       duration: await this.CreatePopDurationInput.inputValue(),
-      productNames: await this.CreatePopProductNameInput.inputValue(),
+      // productNames: await this.CreatePopProductNameInput.inputValue(),
+      productNames: await this.page
+        .locator(".mantine-MultiSelect-value")
+        .allTextContents(),
     };
+
+    // 🔹 Add decryption only if it exists
+    if (decryption_Algorithm) {
+      existingData.decryption_Algorithm = decryption_Algorithm;
+    }
 
     if (mediaType === "Audio") {
       existingData.backgroudplay =
@@ -260,6 +272,10 @@ export class EncMediapage {
     }
 
     if (decryption_Algorithm === "aesGcm" || decryption_Algorithm === "Both") {
+      existingData.nonce = await this.CreatePopNonceInput.inputValue();
+    }
+
+    if (mediaType === "Document" && decryption_Algorithm === "aesGcm" ) {
       existingData.nonce = await this.CreatePopNonceInput.inputValue();
     }
 
@@ -296,6 +312,10 @@ export class EncMediapage {
 
     if (data.controllerOption === "TRUE") {
       await this.CreatePopDisableControllerCheckbox.check();
+    }
+
+    if (data.mediaType === "Document") {
+      await handleInput(this.CreatePopNonceInput, data.nonce);
     }
 
     if (data.mediaType === "Audio" || data.mediaType === "Video") {
@@ -347,13 +367,31 @@ export class EncMediapage {
       data.updatedThumbnail_url,
     );
     await handleInput(this.CreatePopDurationInput, data.updatedDuration);
-
-    if (data.updatedBackgroudplay === "TRUE") {
-      await this.CreatePopEnableBackgroundCheckbox.check();
+    console.log(data.updatedMediaSize);
+    if (data.updatedMediaType === "Audio") {
+      if (data.updatedBackgroudplay === "TRUE") {
+        console.log("checking enable bg");
+        await this.CreatePopEnableBackgroundCheckbox.check();
+      } else {
+        await this.CreatePopEnableBackgroundCheckbox.uncheck();
+      }
     }
 
-    if (data.updatedControllerOption === "TRUE") {
-      await this.CreatePopDisableControllerCheckbox.check();
+    if (
+      data.updatedMediaType === "Audio" ||
+      data.updatedMediaType === "Video"
+    ) {
+      if (data.updatedControllerOption === "TRUE") {
+        console.log("checking controller cks");
+
+        await this.CreatePopDisableControllerCheckbox.check();
+      } else {
+        await this.CreatePopDisableControllerCheckbox.uncheck();
+      }
+    }
+
+    if (data.updatedMediaType === "Document") {
+      await handleInput(this.CreatePopNonceInput, data.nonce);
     }
 
     if (
@@ -471,7 +509,7 @@ export class EncMediapage {
     const productNames = data.productNames;
     await this.searchByProducts(productNames);
     if (await this.noResourcesEncMedia.isVisible()) {
-      allure.attachment(    
+      allure.attachment(
         "Search Result",
         `No resources available for the searched product names for ${data.test_id}`,
         "text/plain",
@@ -524,7 +562,7 @@ export class EncMediapage {
             console.log(`Product name not found: ${val}`);
           }
         }
-        await this.viewMediaCancelBtn.click();
+        await this.cancelBtnX.click();
         console.log("Closed view modal");
       }
       const nextBtn = this.page.getByRole("button", { name: "Next" });

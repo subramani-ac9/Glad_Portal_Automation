@@ -6,7 +6,7 @@ export const productLocators = {
   refreshBtn: ".lucide.lucide-refresh-ccw",
   CreatePopupTitle: "Create New Product",
   UpdatePopupTitle:
-    "xpath=/html[1]/body[1]/div[21]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/h2[1]/div[1]/div[1]/div[2]/div[1]",
+    "xpath=/html[1]/body[1]/div[21]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/div[1]/div[1]/div[2]/div[1]",
   CreatePopTitleInput: "[name='title']",
   CreatePopModeDropdown: "Mode",
   CreatePopIsPrivateCheckbox: "Is Private",
@@ -17,39 +17,53 @@ export const productLocators = {
   CreatePopGladProductTypeDropdown: "Glad Product",
 
   //min max
-  CreatePopUpEventdaysMaximumInput: "input[name='productConfig.duration.eventInDays.max']",
-  CreatePopUpEventdaysMinimumInput: "input[name='productConfig.duration.eventInDays.min']",
-  CreatePopUpSessionMaximumInput: "input[name='productConfig.duration.sessionInMinutes.max']",
-  CreatePopUpSessionMinimumInput: "input[name='productConfig.duration.sessionInMinutes.min']",
+  CreatePopUpEventdaysMaximumInput:
+    "input[name='productConfig.duration.eventInDays.max']",
+  CreatePopUpEventdaysMinimumInput:
+    "input[name='productConfig.duration.eventInDays.min']",
+  CreatePopUpSessionMaximumInput:
+    "input[name='productConfig.duration.sessionInMinutes.max']",
+  CreatePopUpSessionMinimumInput:
+    "input[name='productConfig.duration.sessionInMinutes.min']",
 
   //use cases
   CreatePopUpAllowEventCheckbox: "Allow Event Usecases",
   CreatePopUpAllowResourceCheckbox: "Allow Resource Usecases",
-  CreatePopUpAllowNonconsecutivedatesCheckbox: "Allow Non consecutive dates during Course Creation",
+  CreatePopUpAllowNonconsecutivedatesCheckbox:
+    "Allow Non consecutive dates during Course Creation",
   CreatePopUpAllowMultipleSessionsCheckbox: "Allow Multiple Sessions in a Day",
 
   CreatePopCreateBtn: "Create Product",
 
-
-
   CreatePopTitleRequiredError: "Title is required",
-  CreatePopTitleSpecialCharacterError: "Only letters, numbers, spaces, '.', '-', '_', ':', '[' , ']','@','#','$','%','^','&','*','(' and ')' are allowed",
+  CreatePopTitleSpecialCharacterError:
+    "Only letters, numbers, spaces, '.', '-', '_', ':', '[' , ']','@','#','$','%','^','&','*','(' and ')' are allowed",
   CreatePopTitleInput_Maximum_Error: "Title must be at most 255 characters",
 
-
   CreatePopThumbnailURL_invalid_Error: "Please enter a valid thumbnail URL",
-  CreatePopThumbnailURL_Maximum_Error: "Thumbnail URL must be at most 255 characters",
+  CreatePopThumbnailURL_Maximum_Error:
+    "Thumbnail URL must be at most 255 characters",
 
-
-  CreatePopUpComparativeMinimumDaysError: "Maximum days cannot be less than minimum days",
-  CreatePopUpComparativeMinimumMinutesError: "Maximum minutes cannot be less than minimum minutes",
-  CreatePopUpMinimumDaysError: "Minimum days cannot be less than 0",
-  CreatePopUpMinimumMinutesError: "Maximum minutes cannot be less than 0",
-  CreatePopupMaximumMinitesError :"Cannot exceed 1440 minutes",
-  CreatePopUpMaximumCapacityMaxError :"Capacity cannot be more than 100000",
-  CreatePopUpMaximumCapacityMinError :"Capacity cannot be less than 0",
+  CreatePopUpComparativeMinimumDaysError:
+    "Maximum days cannot be less than minimum days",
+  CreatePopUpComparativeMinimumMinutesError:
+    "Maximum minutes cannot be less than minimum minutes",
+  CreatePopUpMinimumvalueIn_MindaysError: "Minimum days cannot be less than 0",
+  CreatePopUpMinimumvalueIn_MaxdaysError: "Maximum days cannot be less than 0",
+  CreatePopUpMinimumvalueIn_MinMinutesError:
+    "Minimum minutes cannot be less than 0",
+  CreatePopUpMinimumvalueIn_MaxMinutesError:
+    "Maximum minutes cannot be less than 0",
+  CreatePopupMaximumMinitesError: "Cannot exceed 1440 minutes",
+  CreatePopUpMaximumCapacityMaxError: "Capacity cannot be more than 100000",
+  CreatePopUpMaximumCapacityMinError: "Capacity cannot be less than 0",
 
   toasts: ".mantine-Notification-body",
-  cancel_btnX: "//button[@class='mantine-UnstyledButton-root mantine-ActionIcon-root mantine-CloseButton-root mantine-Modal-close mantine-10zglki']//*[name()='svg']",
+  cancel_btnX: ".lucide.lucide-x",
+  //search
+  searchInput: "Search by Title (min. 3 characters)",
+  noAvailableProductsText: "No products available",
 
+  //edit locators
+  editProductBtn: 'button[title="Edit"]',
 };

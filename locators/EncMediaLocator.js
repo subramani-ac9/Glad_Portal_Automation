@@ -62,13 +62,13 @@ export const EncMediaLocators = {
     "//button[@aria-label='Close modal']//*[name()='svg']",
 
   viewIcon : "View icon",
-  viewMediaProducts: 'xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[3]/div[2]/div',
+  viewMediaProducts: 'xpath=/html[1]/body[1]/div[20]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/div[2]/div[3]/div[2]',
   viewMediaFileTypeIcon: ".lucide.lucide-file-text[xmlns='http://www.w3.org/2000/svg'][width='20']",
   viewMediaVideoTypeIcon: ".lucide.lucide-video[xmlns='http://www.w3.org/2000/svg'][width='20']",
   viewMediaAudioTypeIcon: ".lucide.lucide-music[xmlns='http://www.w3.org/2000/svg'][width='20']",
-  viewMediaLanguage :'xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[5]',
+  viewMediaLanguage :'xpath=/html[1]/body[1]/div[20]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/div[2]/div[5]',
   viewMediaEditButton : "Edit",
-  viewMediaTitle : "xpath=/html/body/div[20]/div/div/div/div[2]/section/div[2]/div[1]/div[2]/div",
+  viewMediaTitle : "xpath=/html[1]/body[1]/div[20]/div[1]/div[1]/div[1]/div[2]/section[1]/div[1]/div[2]/div[2]/div[1]",
 
 
   multipleDeleteEncMedia:

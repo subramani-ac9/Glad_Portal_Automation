@@ -13,7 +13,7 @@ export async function readSheet(sheetUrl) {
     columns: true,
     skip_empty_lines: true
   });
-  console.log(data);
+  // console.log(data);
   return data;
 }
 

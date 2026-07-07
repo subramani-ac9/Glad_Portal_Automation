@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 export function toInputDateFormat(dateStr) {
   if (dateStr === "null") return null;
 
-  if (dateStr === "") return ""
+  if (dateStr === "") return "";
 
   const parts = dateStr.split("-");
   if (parts.length !== 3) return null;
@@ -39,6 +39,18 @@ export function formatDateForUI(dateStr) {
   });
 }
 
+export function normalizeTimeToHHMM(time) {
+  if (!time) return "";
+
+  // Handles: "00:00", "00:00:00", "1:00", "01:00:00"
+  const parts = time.split(":");
+
+  const hh = parts[0].padStart(2, "0");
+  const mm = parts[1]?.padStart(2, "0") ?? "00";
+
+  return `${hh}:${mm}`;
+}
+
 function normalize(text) {
   return text.replace(/\s+/g, " ").trim();
 }
@@ -48,7 +60,7 @@ export async function handleInput(locator, value) {
     return false;
   } // skip
 
-  console.log("loc", locator)
+  console.log("loc", locator);
 
   if (value === "") {
     await locator.clear();
@@ -64,69 +76,22 @@ export async function handleInput(locator, value) {
   return true; // updated
 }
 
-// export async function handleMantineSelect(locator, value, page) {
-//   if (value === null || value === undefined || value === "null") {
-//     return false;
-//   }
-
-//   const values = Array.isArray(value)
-//     ? value.map(v => v.toString().trim())
-//     : value.toString().split(",").map(v => v.trim());
-
-//   const isMultiSelect = await locator.evaluate(input =>
-//     input.closest(".mantine-MultiSelect-values") !== null
-//   );
-
-//   let existingValues = [];
-
-//   if (isMultiSelect) {
-//     existingValues = await locator.evaluate(input => {
-//       const wrapper = input.closest(".mantine-MultiSelect-values");
-//       const chips = wrapper.querySelectorAll('[data-value]');
-//       return Array.from(chips).map(c => c.textContent.trim());
-//     });
-//   } else {
-//     const currentValue = (await locator.inputValue()).trim();
-//     if (currentValue) existingValues = [currentValue];
-//   }
-
-//   let updated = false;
-
-//   for (const val of values) {
-//     if (existingValues.includes(val)) continue;
-
-//     // 🔁 Re-open dropdown every time
-//     await locator.click();
-
-//     const option = page.getByRole("option", { name: val });
-
-//     // ⏳ Wait until option is visible
-//     await option.waitFor({ state: "visible" });
-
-//     await option.click();
-//     updated = true;
-
-//     // Small stabilization wait (important for Mantine)
-//     await page.waitForTimeout(200);
-//   }
-
-//   return updated;
-// }
-
 export async function handleMantineSelect(locator, value, page) {
   if (value === null || value === undefined || value === "null") {
     return false;
   }
 
   const val = value.toString().trim();
-  console.log(locator,val);
+  console.log(locator, val);
 
   // Read current value
-  const currentValue = (await locator.inputValue()).trim();
+  if (await locator.inputValue()) {
+    const currentValue = (await locator.inputValue()).trim();
 
-  // Skip if already selected
-  if (currentValue === val) {
-    return false;
+    // Skip if already selected
+    if (currentValue === val) {
+      return false;
+    }
   }
 
   // Open dropdown
@@ -136,11 +101,9 @@ export async function handleMantineSelect(locator, value, page) {
 
   // Wait until option is visible
   await option.waitFor({ state: "visible" });
-  console.log("option located");
 
   // Select option
   await option.click();
-  console.log("option clicked");
 
   // Small stabilization wait (important for Mantine)
   await page.waitForTimeout(200);
@@ -149,26 +112,25 @@ export async function handleMantineSelect(locator, value, page) {
 }
 
 export async function handleMutliSelect(locator, value, page) {
-
   if (value === null || value === undefined || value === "null") {
     return false;
   }
 
+  const container = locator.locator("..");
+
   const desiredValues = Array.isArray(value)
-  ? value.map(v => v.toString().trim()).filter(v => v.length > 0)
-  : value
-      .toString()
-      .split(",")
-      .map(v => v.trim())
-      .filter(v => v.length > 0);
+    ? value.map((v) => v.toString().trim()).filter((v) => v.length > 0)
+    : value
+        .toString()
+        .split(",")
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
 
-
-  // 1️⃣ Read currently selected values (chips)
-  const selectedValues = await page
-    .locator('.mantine-MultiSelect-value')
+  const selectedValues = await container
+    .locator(".mantine-MultiSelect-value")
     .allTextContents();
 
-  const normalizedSelected = selectedValues.map(v => v.trim());
+  const normalizedSelected = selectedValues.map((v) => v.trim());
 
   console.log("selected values:", normalizedSelected);
   console.log("desired values:", desiredValues);
@@ -181,9 +143,11 @@ export async function handleMutliSelect(locator, value, page) {
 
     // Remove every chip
     for (const value of normalizedSelected) {
-      const chip = page.locator('.mantine-MultiSelect-value', { hasText: value });
+      const chip = container.locator(".mantine-MultiSelect-value", {
+        hasText: value,
+      });
       if (await chip.count()) {
-        await chip.locator('button').click();
+        await chip.locator("button").click();
       }
     }
 
@@ -193,12 +157,12 @@ export async function handleMutliSelect(locator, value, page) {
 
   // 2️⃣ VALUES TO REMOVE (selected but not desired)
   const valuesToRemove = normalizedSelected.filter(
-    value => !desiredValues.includes(value)
+    (value) => !desiredValues.includes(value),
   );
 
   // 3️⃣ VALUES TO ADD (desired but not selected)
   const valuesToAdd = desiredValues.filter(
-    value => !normalizedSelected.includes(value)
+    (value) => !normalizedSelected.includes(value),
   );
 
   if (valuesToRemove.length === 0 && valuesToAdd.length === 0) {
@@ -207,26 +171,27 @@ export async function handleMutliSelect(locator, value, page) {
 
   // 4️⃣ Remove unwanted values
   for (const value of valuesToRemove) {
-    const chip = page.locator('.mantine-MultiSelect-value', { hasText: value });
+    const chip = container.locator(".mantine-MultiSelect-value", {
+      hasText: value,
+    });
     if (await chip.count()) {
-      await chip.locator('button').click();
+      await chip.locator("button").click();
     }
   }
 
   // 5️⃣ Add missing
   if (valuesToAdd.length > 0) {
     await locator.click();
+    console.log("drop down clicked");
   }
 
   // 5️⃣ Add missing values
   for (const value of valuesToAdd) {
-
-    const listbox = page.locator('div[role="listbox"]');
+    const listbox = page.locator('div[role="listbox"]:visible');
     await expect(listbox).toBeVisible();
-
-    await listbox
-      .locator('div[role="option"]', { hasText: value })
-      .click();
+    console.log("option located");
+    await listbox.locator('div[role="option"]', { hasText: value }).click();
+    console.log("option clicked");
   }
 
   await page.waitForTimeout(200);
@@ -240,9 +205,8 @@ export async function openPopup(triggerBtn, popupTitle) {
 
 export async function refreshList(refreshBtn, toasts) {
   await refreshBtn.click();
-  await expect(toasts).toContainText("Success");
+  await expect(toasts).toContainText("Refreshed Successfully");
 }
-
 
 export async function getRowData(row) {
   return {
@@ -253,9 +217,8 @@ export async function getRowData(row) {
 }
 
 export function isErrorExpected(expected) {
-  return expected.some(value =>
-    value.endsWith("_required_error") ||
-    value.endsWith("_error")
+  return expected.some(
+    (value) => value.endsWith("_required_error") || value.endsWith("_error"),
   );
 }
 export async function findRowAndAction(page, data, operation) {
@@ -315,17 +278,20 @@ export async function findRowAndAction(page, data, operation) {
       const time = normalize(await row.locator("td").nth(1).innerText());
       const tz = normalize(await row.locator("td").nth(2).innerText());
 
+      console.log(`Checking → ${dateCell} | ${timeCell} | ${timezoneCell}`);
+
+      const uiTime = normalizeTimeToHHMM(timeCell);
+      const sheetTime = normalizeTimeToHHMM(data.start_time);
+
       const existingData = {
         date,
-        start_time: time,
+        start_time: uiTime,
         timezone: tz,
       };
 
-      console.log(`Checking → ${dateCell} | ${timeCell} | ${timezoneCell}`);
-
       if (
         dateCell.includes(uiDate) &&
-        timeCell.includes(data.start_time) &&
+        uiTime === sheetTime &&
         timezoneCell.includes(data.timezone)
       ) {
         found = true;
@@ -400,4 +366,25 @@ export async function findRowAndAction(page, data, operation) {
   throw new Error(
     `❌ Record not found → ${uiDate} ${data.start_time} ${data.timezone}`,
   );
+}
+
+//In pageination loop to move first page
+export async function moveToFirstPage(page) {
+  const firstBtn = page.getByRole("button", { name: "Previous" });
+  while ((await firstBtn.isVisible()) && (await firstBtn.isEnabled())) {
+    await firstBtn.click();
+    await page.waitForLoadState("networkidle");
+  }
+}
+
+// In pageination to move one by one page
+export async function moveToNextPage(page) {
+  const nextBtn = page.getByRole("button", { name: "Next" });
+  if (await nextBtn.isDisabled()) {
+    return false;
+  }
+  await nextBtn.click();
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(2000);
+  return true;
 }

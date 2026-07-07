@@ -1,42 +1,58 @@
-import { EncMediapage } from './../pages/EncMediaPage';
-
+import { expect } from "@playwright/test";
 
 export const EncMediaAssertions = {
-  AOL_icon_dashboard: {
-    scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.aolIcon).toBeVisible();
-    },
-  },
 
   EncMedia_title_visible: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.title).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.title).toBeVisible();
     },
   },
 
   // ------------------ toast ---------------
-
-  create_edit_delete_successMsg: {
+ ENC_create_success_msg: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.toasts).toContainText("Success");
-    },
-  },
-  title_already_existing_error: {
-    scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.toasts).toContainText("Error");
-      await expect(EncMediapage.toasts).toContainText("Encrypted media already exists");
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Success");
+      await expect(encMediaPage.toasts).toContainText(
+        "Resource created successfully",
+      );
     },
   },
 
-  media_notFound_error: {
+  ENC_update_success_msg: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.toasts).toContainText("Error");
-      await expect(EncMediapage.toasts).toContainText("Encrypted media file not found in S3 storage");
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Success");
+      await expect(encMediaPage.toasts).toContainText(
+        "Resource updated successfully",
+      );
+    },
+  },
+
+  ENC_delete_success_msg: {
+    scope: "page",
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Success");
+      await expect(encMediaPage.toasts).toContainText(
+        "Resource deleted successfully",
+      );
+    },
+  },
+
+  ENC_title_already_existing_error: {
+    scope: "page",
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Error");
+      await expect(encMediaPage.toasts).toContainText("Encrypted media already exists");
+    },
+  },
+
+  ENC_media_notFound_error: {
+    scope: "page",
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Error");
+      await expect(encMediaPage.toasts).toContainText("Encrypted media file not found in S3 storage");
     },
 
   },
@@ -44,116 +60,116 @@ export const EncMediaAssertions = {
 
   ////////////////////
 
-  title_required_error: {
+  ENC_title_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopTitle_RequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopTitle_RequiredError).toBeVisible();
     },
   },
 
-  mediaSize_required_error: {
+  ENC_mediaSize_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopTitle_RequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopTitle_RequiredError).toBeVisible();
     },
   },
 
-  mediaURL_required_error: {
+  ENC_mediaURL_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopMediaURLRequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopMediaURLRequiredError).toBeVisible();
     },
   },
 
-  duration_required_error: {
+  ENC_duration_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopDurationRequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopDurationRequiredError).toBeVisible();
     },
   },
 
-  ProductName_required_error: {
+  ENC_ProductName_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopProductNameRequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopProductNameRequiredError).toBeVisible();
     },
   },
 
-  DecryptionAlgorithm_required_error: {
+  ENC_DecryptionAlgorithm_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopDecryptionAlgorithmRequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopDecryptionAlgorithmRequiredError).toBeVisible();
     },
   },
 
-  nonce_required_error: {
+  ENC_nonce_required_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopNonceRequiredError).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopNonceRequiredError).toBeVisible();
     },
   },
 
-  title_maximum_error: {
+  ENC_title_maximum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopTitleInput_Maximum_Error).toBeVisible();
-    },
-  },
-
-
-  mediaSize_maximum_error: {
-    scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopMediaSize_Maximum_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopTitleInput_Maximum_Error).toBeVisible();
     },
   },
 
 
-  mediaSize_minimum_error: {
+  ENC_mediaSize_maximum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopMediaSize_Minimum_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopMediaSize_Maximum_Error).toBeVisible();
     },
   },
 
 
-  mediaURL_maximum_error: {
+  ENC_mediaSize_minimum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopMediaURL_Maximum_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopMediaSize_Minimum_Error).toBeVisible();
     },
   },
 
 
-  duration_maximum_error: {
+  ENC_mediaURL_maximum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopDuration_Maximum_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopMediaURL_Maximum_Error).toBeVisible();
     },
   },
 
 
-  thumbnailURL_maximum_error: {
+  ENC_duration_maximum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopThumbnailURL_Maximum_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopDuration_Maximum_Error).toBeVisible();
     },
   },
 
 
-  invalid_mediaURL_error: {
+  ENC_thumbnailURL_maximum_error: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.CreatePopMediaURL_invalid_Error).toBeVisible();
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopThumbnailURL_Maximum_Error).toBeVisible();
+    },
+  },
+
+
+  ENC_invalid_mediaURL_error: {
+    scope: "page",
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.CreatePopMediaURL_invalid_Error).toBeVisible();
     },
   },
 
 
 
-  multipleDeleteSuccessMsg: {
+  ENC_multipleDeleteSuccessMsg: {
     scope: "page",
-    fn: async ({ EncMediapage }) => {
-      await expect(EncMediapage.toasts).toContainText("Selected resources deleted successfully");
+    fn: async ({ encMediaPage }) => {
+      await expect(encMediaPage.toasts).toContainText("Selected resources deleted successfully");
     }
   }
 
